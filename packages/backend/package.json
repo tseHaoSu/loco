@@ -1,0 +1,19 @@
+{
+  "name": "@repo/backend",
+  "type": "module",
+  "scripts": {
+    "dev": "convex dev",
+    "setup": "convex dev --until-success",
+    "build": "echo 'Convex backend - run pnpm dev to start'"
+  },
+  "exports": {
+    "./convex": "./convex/*.ts"
+  },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "convex": "^1.28.0"
+  }
+}
