@@ -1,5 +1,5 @@
 {
-  "name": "@repo/backend",
+  "name": "@workspace/backend",
   "type": "module",
   "scripts": {
     "dev": "convex dev",
@@ -7,9 +7,14 @@
     "build": "echo 'Convex backend - run pnpm dev to start'"
   },
   "exports": {
-    "./convex": "./convex/*.ts"
+    "./convex/_generated/api": {
+      "types": "./convex/_generated/api.d.ts",
+      "default": "./convex/_generated/api.js"
+    },
+    "./convex/*": "./convex/*"
   },
   "devDependencies": {
+    "@types/node": "^20.19.9",
     "@workspace/typescript-config": "workspace:*",
     "typescript": "latest"
   },
