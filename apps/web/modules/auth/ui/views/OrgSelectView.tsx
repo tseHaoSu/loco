@@ -1,9 +1,17 @@
-import React from 'react'
+import React from "react";
+import { OrganizationList } from "@clerk/nextjs";
 
-const orgSelectView = () => {
+const OrgSelectView = () => {
   return (
-    <div>orgSelectView</div>
-  )
-}
+    <div>
+      <OrganizationList
+        afterCreateOrganizationUrl="/"
+        afterSelectOrganizationUrl="/"
+        hidePersonal
+        skipInvitationScreen
+      />
+    </div>
+  );
+};
 
-export default orgSelectView
+export default OrgSelectView;
