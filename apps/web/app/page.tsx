@@ -1,10 +1,26 @@
 "use client";
 
 import { api } from "@workspace/backend/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, Authenticated, Unauthenticated } from "convex/react";
 import { Button } from "@workspace/ui/components/button";
 
-export default function Page() {
+
+const Page = () => {
+  return (
+    <>
+      <Authenticated>
+        <Content />
+      </Authenticated>
+      <Unauthenticated>
+        <div className="flex items-center justify-center min-h-svh">
+          <p>Please sign in to continue</p>
+        </div>
+      </Unauthenticated>
+    </>
+  );
+};
+
+const Content = () => {
   const users = useQuery(api.users.getMany);
   const addUser = useMutation(api.users.add);
   return (
@@ -16,4 +32,6 @@ export default function Page() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;
