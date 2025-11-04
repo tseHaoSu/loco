@@ -1,6 +1,6 @@
 "use client";
 
-import { OrganizationSwitcher } from "@clerk/nextjs";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Button } from "@workspace/ui/components/button";
 import { useMutation, useQuery } from "convex/react";
@@ -10,11 +10,12 @@ const Page = () => {
   const addUser = useMutation(api.users.add);
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+      <div className="w-full">
         <div className="flex flex-col gap-6">
           <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
 
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <UserButton />
             <OrganizationSwitcher hidePersonal />
           </div>
 
