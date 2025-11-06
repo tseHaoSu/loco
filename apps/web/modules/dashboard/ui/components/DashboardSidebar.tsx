@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import Link from "next/link"; // ✅ Add this
 import { usePathname } from "next/navigation";
+import { ModeToggle } from "@/components/theme-toggle";
 
 const customerSupportItems = [
   {
@@ -71,21 +72,22 @@ const SidebarHeaderContent = () => {
   const isCollapsed = state === "collapsed";
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild size="lg">
-          <Link href="/" className="flex items-center gap-2">
-            {isCollapsed ? (
-              <div className="flex items-center justify-center w-full">
+    <div className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-between '} gap-2`}>
+      <SidebarMenu className={isCollapsed ? '' : 'flex-1'}>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild size="lg" isActive={false}>
+            <Link href="/" className="flex items-center gap-2">
+              {isCollapsed ? (
                 <span className="text-2xl font-extrabold">L</span>
-              </div>
-            ) : (
-              <span className="text-2xl font-extrabold">Loco</span>
-            )}
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    </SidebarMenu>
+              ) : (
+                <span className="text-2xl font-extrabold">Loco</span>
+              )}
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+      {!isCollapsed && <ModeToggle />}
+    </div>
   );
 };
 
