@@ -11,7 +11,7 @@ export const WidgetHeader = ({
   return (
     <header
       className={cn(
-        "relative border-b bg-gradient-to-br from-background via-muted/20 to-accent/10 p-4",
+        "relative border-b border-white/10 bg-gradient-to-br from-background/80 via-muted/10 to-accent/5 p-4 backdrop-blur-md shadow-lg",
         className
       )}
     >

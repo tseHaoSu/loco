@@ -1,19 +1,18 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Home, Inbox } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
-interface WidgetFooterProps {
-  screen?: "home" | "inbox";
-  onNavigate?: (screen: "home" | "inbox") => void;
-}
-
-export const WidgetFooter = ({ screen = "home", onNavigate }: WidgetFooterProps) => {
+export const WidgetFooter = () => {
+  const [screen, setScreen] = useState<"home" | "inbox">("home");
   return (
     <div className="flex items-center justify-center gap-2 border-t bg-background p-4">
       <Button
         variant="ghost"
         className="flex-1"
-        onClick={() => onNavigate?.("home")}
+        onClick={() => setScreen("home")}
       >
         <Home
           className={cn(
@@ -26,7 +25,7 @@ export const WidgetFooter = ({ screen = "home", onNavigate }: WidgetFooterProps)
       <Button
         variant="ghost"
         className="flex-1"
-        onClick={() => onNavigate?.("inbox")}
+        onClick={() => setScreen("inbox")}
       >
         <Inbox
           className={cn(
