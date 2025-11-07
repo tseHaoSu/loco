@@ -1,13 +1,15 @@
 import React from "react";
 import { cn } from "@workspace/ui/lib/utils";
 
-export const WidgetHeader = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
+interface WidgetHeaderProps {
+  organizationId?: string;
   className?: string;
-}) => {
+}
+
+export const WidgetHeader = ({
+  organizationId,
+  className,
+}: WidgetHeaderProps) => {
   return (
     <header
       className={cn(
@@ -15,7 +17,17 @@ export const WidgetHeader = ({
         className
       )}
     >
-      {children}
+      <div className="text-center space-y-1">
+        <h1 className="text-2xl font-bold">Voice Assistant</h1>
+        <p className="text-sm text-muted-foreground">
+          Click the button below to start a conversation
+          {organizationId && (
+            <span className="block text-xs mt-1">
+              Organization: {organizationId}
+            </span>
+          )}
+        </p>
+      </div>
     </header>
   );
 };

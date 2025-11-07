@@ -2,31 +2,34 @@
 
 import { WidgetHeader } from "@/modules/ui/components/WidgetHeader";
 import { WidgetFooter } from "@/modules/ui/components/WidgetFooter";
-import { WidgetStartCall } from "@/modules/ui/components/WidgetStartCall";
+import { LoadingView } from "@/modules/ui/components/LoadingView";
 import { WidgetAuth } from "../screens/WidgetAuth";
+import { screenAtom } from "@/store/widget-atoms";
+import { useAtomValue } from "jotai";
 
 interface Props {
   organizationId: string;
 }
 
 export const WidgetView = ({ organizationId }: Props) => {
+  const screen = useAtomValue(screenAtom);
+
+  const screenComponents: Record<string, React.ReactNode> = {
+    error: <p>Error Screen</p>,
+    loading: <LoadingView />,
+    selection: <p>Selection Screen</p>,
+    voice: <p>Voice Screen</p>,
+    auth: <WidgetAuth organizationId={organizationId} />,
+    inbox: <p>Inbox Screen</p>,
+    contact: <p>Contact Screen</p>,
+    chat: <p>Chat Screen</p>,
+  };
+
   return (
     <div className="flex flex-col min-h-svh bg-gradient-to-br from-background to-muted/20">
-      <WidgetHeader>
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold">Voice Assistant</h1>
-          <p className="text-sm text-muted-foreground">
-            Click the button below to start a conversation
-            {organizationId && (
-              <span className="block text-xs mt-1">
-                Organization: {organizationId}
-              </span>
-            )}
-          </p>
-        </div>
-      </WidgetHeader>
+      <WidgetHeader organizationId={organizationId} />
       <div className="flex-1 flex flex-col gap-6 overflow-y-auto pt-6">
-        <WidgetAuth organizationId={organizationId} />
+        {screenComponents[screen]}
       </div>
       <WidgetFooter />
     </div>
