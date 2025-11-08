@@ -1,11 +1,12 @@
 "use client";
 
-import { WidgetHeader } from "@/modules/ui/components/WidgetHeader";
 import { WidgetFooter } from "@/modules/ui/components/WidgetFooter";
-import { LoadingView } from "@/modules/ui/components/LoadingView";
-import { WidgetAuth } from "../screens/WidgetAuth";
+import { WidgetHeader } from "@/modules/ui/components/WidgetHeader";
+import { WidgetLoading } from "@/modules/ui/screens/WidgetLoading";
 import { screenAtom } from "@/store/widget-atoms";
 import { useAtomValue } from "jotai";
+import { WidgetAuth } from "../screens/WidgetAuth";
+import { WidgetError } from "../screens/WidgetError";
 
 interface Props {
   organizationId: string;
@@ -15,8 +16,8 @@ export const WidgetView = ({ organizationId }: Props) => {
   const screen = useAtomValue(screenAtom);
 
   const screenComponents: Record<string, React.ReactNode> = {
-    error: <p>Error Screen</p>,
-    loading: <LoadingView />,
+    error: <WidgetError />,
+    loading: <WidgetLoading organizationId={organizationId} />,
     selection: <p>Selection Screen</p>,
     voice: <p>Voice Screen</p>,
     auth: <WidgetAuth organizationId={organizationId} />,
