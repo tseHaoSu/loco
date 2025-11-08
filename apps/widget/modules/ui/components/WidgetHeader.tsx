@@ -21,11 +21,6 @@ export const WidgetHeader = ({
         <h1 className="text-2xl font-bold">Voice Assistant</h1>
         <p className="text-sm text-muted-foreground">
           Click the button below to start a conversation
-          {organizationId && (
-            <span className="block text-xs mt-1">
-              Organization: {organizationId}
-            </span>
-          )}
         </p>
       </div>
     </header>

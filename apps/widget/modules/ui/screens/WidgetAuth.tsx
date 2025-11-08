@@ -16,6 +16,8 @@ import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { useMutation } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
+import { useAtom, useSetAtom } from "jotai";
+import { screenAtom, contactSessionIdAtomFamily } from "@/store/widget-atoms";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -35,6 +37,10 @@ export const WidgetAuth = ({ organizationId }: WidgetAuthProps) => {
     },
   });
 
+  const setScreen = useSetAtom(screenAtom);
+  const contactSessionIdAtom = contactSessionIdAtomFamily(organizationId);
+  const [contactSessionId, setContactSessionId] = useAtom(contactSessionIdAtom);
+
   const createContactSession = useMutation(api.public.contactSessions.create);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -53,7 +59,10 @@ export const WidgetAuth = ({ organizationId }: WidgetAuthProps) => {
           referrer: document.referrer || undefined,
         },
       });
-      console.log("Contact session created:", sessionId);
+
+      // Save session ID to localStorage and navigate to selection
+      setContactSessionId(sessionId);
+      setScreen("selection");
       form.reset();
     } catch (error) {
       console.error("Failed to create contact session:", error);
