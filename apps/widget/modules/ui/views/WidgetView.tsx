@@ -6,7 +6,9 @@ import { WidgetLoading } from "@/modules/ui/screens/WidgetLoading";
 import { screenAtom } from "@/store/widget-atoms";
 import { useAtomValue } from "jotai";
 import { WidgetAuth } from "../screens/WidgetAuth";
+import { WidgetChat } from "../screens/WidgetChat";
 import { WidgetError } from "../screens/WidgetError";
+import { WidgetSelection } from "../screens/WidgetSelection";
 
 interface Props {
   organizationId: string;
@@ -18,12 +20,12 @@ export const WidgetView = ({ organizationId }: Props) => {
   const screenComponents: Record<string, React.ReactNode> = {
     error: <WidgetError />,
     loading: <WidgetLoading organizationId={organizationId} />,
-    selection: <p>Selection Screen</p>,
+    selection: <WidgetSelection />,
     voice: <p>Voice Screen</p>,
     auth: <WidgetAuth organizationId={organizationId} />,
     inbox: <p>Inbox Screen</p>,
     contact: <p>Contact Screen</p>,
-    chat: <p>Chat Screen</p>,
+    chat: <WidgetChat />,
   };
 
   return (

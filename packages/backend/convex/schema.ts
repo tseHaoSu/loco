@@ -1,7 +1,5 @@
-import { time } from "console";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { platform } from "os";
 
 export default defineSchema({
   contactSessions: defineTable({
@@ -27,6 +25,22 @@ export default defineSchema({
   })
     .index("by_expires_at", ["expiresAt"])
     .index("by_organization_id", ["organizationId"]),
+
+  conversations: defineTable({
+    threadId: v.string(),
+    organizationId: v.string(),
+    contactSessionId: v.string(),
+    status: v.union(
+      v.literal("unresolved"),
+      v.literal("escalated"),
+      v.literal("resolved")
+    ),
+  })
+    .index("by_organization_id", ["organizationId"])
+    .index("by_contact_session_id", ["contactSessionId"])
+    .index("by_status", ["status"])
+    .index("by_thread_id", ["threadId"]),
+
   users: defineTable({
     name: v.string(),
   }),

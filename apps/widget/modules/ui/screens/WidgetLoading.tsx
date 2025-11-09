@@ -6,6 +6,7 @@ import {
   contactSessionIdAtomFamily,
 } from "@/store/widget-atoms";
 import { api } from "@workspace/backend/convex/_generated/api";
+import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { useAction, useMutation } from "convex/react";
 import { atom, useAtom, useSetAtom } from "jotai";
@@ -85,7 +86,7 @@ export const WidgetLoading = ({ organizationId }: Props) => {
     const validateSession = async () => {
       try {
         const result = await validateContactSession({
-          contactSessionId: contactSessionId as any,
+          contactSessionId: contactSessionId as Id<"contactSessions">,
         });
 
         if (result.valid) {
