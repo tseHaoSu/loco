@@ -10,6 +10,9 @@ import tseslint from "typescript-eslint"
  * @type {import("eslint").Linter.Config}
  * */
 export const config = [
+  {
+    ignores: ["dist/**", "node_modules/**", ".next/**"],
+  },
   js.configs.recommended,
   eslintConfigPrettier,
   ...tseslint.configs.recommended,
@@ -27,6 +30,10 @@ export const config = [
     },
   },
   {
-    ignores: ["dist/**"],
+    rules: {
+      // Turn off the problematic rule that has a bug in ESLint 9
+      "@typescript-eslint/no-unused-expressions": "off",
+      "no-unused-expressions": "warn",
+    },
   },
 ]

@@ -3,6 +3,7 @@ import { atomFamily } from "jotai/utils";
 import { atomWithStorage } from "jotai/utils";
 import { WidgetScreen } from "./types";
 import { CONTACT_SESSION_STORAGE_KEY } from "./constants";
+import { Id } from "@workspace/backend/convex/_generated/dataModel.js";
 
 export const screenAtom = atom<WidgetScreen>("loading");
 export const errorMessageAtom = atom<string | null>(
@@ -18,3 +19,5 @@ export const contactSessionIdAtomFamily = atomFamily((organizationId: string) =>
     null
   )
 );
+
+export const conversationIdAtom = atom<Id<"conversations"> | null>(null);
