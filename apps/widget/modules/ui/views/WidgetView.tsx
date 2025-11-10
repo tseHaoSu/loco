@@ -9,6 +9,7 @@ import { WidgetAuth } from "../screens/WidgetAuth";
 import { WidgetChat } from "../screens/WidgetChat";
 import { WidgetError } from "../screens/WidgetError";
 import { WidgetSelection } from "../screens/WidgetSelection";
+import { WidgetStartCall } from "../screens/WidgetStartCall";
 
 interface Props {
   organizationId: string;
@@ -21,7 +22,7 @@ export const WidgetView = ({ organizationId }: Props) => {
     error: <WidgetError />,
     loading: <WidgetLoading organizationId={organizationId} />,
     selection: <WidgetSelection />,
-    voice: <p>Voice Screen</p>,
+    voice: <WidgetStartCall />,
     auth: <WidgetAuth organizationId={organizationId} />,
     inbox: <p>Inbox Screen</p>,
     contact: <p>Contact Screen</p>,

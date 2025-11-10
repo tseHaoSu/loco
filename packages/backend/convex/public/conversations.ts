@@ -19,7 +19,24 @@ export const getOneConversation = query({
     }
 
     const conversation = await ctx.db.get(args.conversationId);
-    return conversation;
+    
+    if (!conversation) {
+      throw new ConvexError({
+        code: "NOT_FOUND",
+        message: "Conversation not found.",
+      });
+    }
+    if (conversation.contactSessionId !== session._id) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Conversation does not belong to the contact session.",
+      });
+    }
+    return {
+      _id: conversation._id,
+      status: conversation.status,
+      threadId: conversation.threadId,
+    };
   },
 });
 

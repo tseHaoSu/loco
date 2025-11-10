@@ -1,5 +1,6 @@
 "use client";
 
+import { useVAPI } from "@/hooks/use-vapi";
 import {
   contactSessionIdAtomFamily,
   conversationIdAtomFamily,
@@ -12,8 +13,8 @@ import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Button } from "@workspace/ui/components/button";
 import { useMutation } from "convex/react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { MessageSquarePlus } from "lucide-react";
-import React, { useState } from "react";
+import { MessageSquarePlus, Phone } from "lucide-react";
+import { useState } from "react";
 
 export const WidgetSelection = () => {
   const setScreen = useSetAtom(screenAtom);
@@ -28,6 +29,7 @@ export const WidgetSelection = () => {
 
   const [pending, setPending] = useState(false);
   const createConversation = useMutation(api.public.conversations.create);
+  const { startCall } = useVAPI();
 
   const handleNewConversation = async () => {
     if (!organizationId) {
@@ -49,7 +51,38 @@ export const WidgetSelection = () => {
       setConversationId(conversationId);
       setScreen("chat");
     } catch (error) {
+      setError("Failed to create conversation. Please try again.");
+      setScreen("error");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const handleNewVoiceCall = async () => {
+    if (!organizationId) {
+      setError("Organization ID is missing.");
+      setScreen("error");
+      return;
+    }
+    if (!contactSessionId) {
       setScreen("auth");
+      return;
+    }
+
+    setPending(true);
+    try {
+      // Start the call first to capture user gesture for mic permission
+      startCall();
+
+      const conversationId = await createConversation({
+        organizationId,
+        contactSessionId: contactSessionId as Id<"contactSessions">,
+      });
+      setConversationId(conversationId);
+      setScreen("voice");
+    } catch (error) {
+      setError("Failed to start voice call. Please try again.");
+      setScreen("error");
     } finally {
       setPending(false);
     }
@@ -57,7 +90,7 @@ export const WidgetSelection = () => {
 
   return (
     <div className="px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto space-y-6">
         <div className="rounded-lg border bg-card p-6 shadow-sm">
           <div className="flex flex-col items-center gap-4">
             <div className="text-center space-y-2">
@@ -75,6 +108,16 @@ export const WidgetSelection = () => {
             >
               <MessageSquarePlus className="mr-2 h-5 w-5" />
               {pending ? "Creating..." : "New Conversation"}
+            </Button>
+
+            <Button
+              onClick={handleNewVoiceCall}
+              size="lg"
+              className="w-full max-w-xs"
+              disabled={pending}
+            >
+              <Phone className="mr-2 h-5 w-5" />
+              {pending ? "Starting..." : "Start Voice Call"}
             </Button>
           </div>
         </div>
