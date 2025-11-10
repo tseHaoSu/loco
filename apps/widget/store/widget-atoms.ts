@@ -14,10 +14,19 @@ export const organizationIdAtom = atom<string | null>(null);
 
 // Contact session ID stored in localStorage, scoped by organization, dynamically created
 export const contactSessionIdAtomFamily = atomFamily((organizationId: string) =>
-  atomWithStorage<string | null>(
+  atomWithStorage<Id<"contactSessions"> | null>(
     `${CONTACT_SESSION_STORAGE_KEY}_${organizationId}`,
     null
   )
 );
 
+// Conversation ID stored in localStorage, scoped by organization
+export const conversationIdAtomFamily = atomFamily((organizationId: string) =>
+  atomWithStorage<Id<"conversations"> | null>(
+    `widget_conversation_${organizationId}`,
+    null
+  )
+);
+
+// Legacy atom for backward compatibility - can be removed after migration
 export const conversationIdAtom = atom<Id<"conversations"> | null>(null);

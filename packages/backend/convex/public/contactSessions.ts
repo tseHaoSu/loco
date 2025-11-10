@@ -43,7 +43,7 @@ export const validate = mutation({
     const contactSession = await ctx.db.get(args.contactSessionId);
     if (!contactSession) throw new Error("Session not found");
     if (contactSession.expiresAt < Date.now()) {
-      throw new Error("Session expired");
+      return { valid: false, contactSession: null };
     }
     return { valid: true, contactSession };
   },

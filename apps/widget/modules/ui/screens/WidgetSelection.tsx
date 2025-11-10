@@ -2,7 +2,7 @@
 
 import {
   contactSessionIdAtomFamily,
-  conversationIdAtom,
+  conversationIdAtomFamily,
   errorMessageAtom,
   organizationIdAtom,
   screenAtom,
@@ -22,7 +22,9 @@ export const WidgetSelection = () => {
   const contactSessionId = useAtomValue(
     contactSessionIdAtomFamily(organizationId || "")
   );
-  const setConversationId = useSetAtom(conversationIdAtom);
+  const setConversationId = useSetAtom(
+    conversationIdAtomFamily(organizationId || "")
+  );
 
   const [pending, setPending] = useState(false);
   const createConversation = useMutation(api.public.conversations.create);
