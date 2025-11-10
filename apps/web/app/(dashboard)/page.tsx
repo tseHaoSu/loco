@@ -6,8 +6,8 @@ import { Button } from "@workspace/ui/components/button";
 import { useMutation, useQuery } from "convex/react";
 
 const Page = () => {
-  const users = useQuery(api.users.getMany);
-  const addUser = useMutation(api.users.add);
+  const users = useQuery(api.public.users.getMany);
+  const addUser = useMutation(api.public.users.add);
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full">

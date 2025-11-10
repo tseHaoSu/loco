@@ -12,10 +12,10 @@ import type * as public_contactSessions from "../public/contactSessions.js";
 import type * as public_conversations from "../public/conversations.js";
 import type * as public_message from "../public/message.js";
 import type * as public_organizations from "../public/organizations.js";
+import type * as public_users from "../public/users.js";
 import type * as system_agent_supportAgent from "../system/agent/supportAgent.js";
 import type * as system_internal_contactSessions from "../system/internal/contactSessions.js";
 import type * as system_internal_conversations from "../system/internal/conversations.js";
-import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -36,10 +36,10 @@ declare const fullApi: ApiFromModules<{
   "public/conversations": typeof public_conversations;
   "public/message": typeof public_message;
   "public/organizations": typeof public_organizations;
+  "public/users": typeof public_users;
   "system/agent/supportAgent": typeof system_agent_supportAgent;
   "system/internal/contactSessions": typeof system_internal_contactSessions;
   "system/internal/conversations": typeof system_internal_conversations;
-  users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
