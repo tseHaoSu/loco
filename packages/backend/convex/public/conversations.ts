@@ -1,5 +1,8 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
+import { supportAgent } from "../system/agent/supportAgent";
+import { components } from "../_generated/api";
+import { saveMessage } from "@convex-dev/agent";
 
 export const getOneConversation = query({
   args: {
@@ -16,6 +19,7 @@ export const getOneConversation = query({
     }
 
     const conversation = await ctx.db.get(args.conversationId);
+    
     if (!conversation) {
       throw new ConvexError({
         code: "NOT_FOUND",
@@ -52,7 +56,18 @@ export const create = mutation({
     }
 
     //Create the thread ID
-    const threadId = "123";
+    const { threadId } = await supportAgent.createThread(ctx, {
+      userId: args.organizationId,
+    });
+
+    await saveMessage(ctx, components.agent, {
+      threadId,
+      message: {
+        role: "assistant",
+        content: "Hello! How can I assist you today?",
+      },
+    });
+
     const conversationId = await ctx.db.insert("conversations", {
       contactSessionId: args.contactSessionId,
       status: "unresolved",

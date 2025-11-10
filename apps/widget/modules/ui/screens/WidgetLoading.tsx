@@ -4,12 +4,13 @@ import {
   organizationIdAtom,
   screenAtom,
   contactSessionIdAtomFamily,
+  conversationIdAtomFamily,
 } from "@/store/widget-atoms";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { useAction, useMutation } from "convex/react";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 
 type Init = "storage" | "org" | "session" | "settings" | "vapi" | "done";
@@ -25,11 +26,15 @@ export const WidgetLoading = ({ organizationId }: Props) => {
   const setScreen = useSetAtom(screenAtom);
   const setOrganizationId = useSetAtom(organizationIdAtom);
 
-  // Get the contact session atom for this specific organization
-  const contactSessionIdAtom = organizationId
-    ? contactSessionIdAtomFamily(organizationId)
-    : atom<string | null>(null);
-  const [contactSessionId, setContactSessionId] = useAtom(contactSessionIdAtom);
+  // Get the contact session and conversation atoms
+  // Use empty string as fallback
+  const [contactSessionId, setContactSessionId] = useAtom(
+    contactSessionIdAtomFamily(organizationId || "")
+  );
+  const [conversationId] = useAtom(
+    conversationIdAtomFamily(organizationId || "")
+  );
+
   const validateOrganization = useAction(api.public.organizations.validate);
 
   // 1. validate organization
@@ -91,7 +96,7 @@ export const WidgetLoading = ({ organizationId }: Props) => {
 
         if (result.valid) {
           setStep("done");
-          setScreen("selection");
+          setScreen(conversationId ? "chat" : "selection");
         } else {
           setContactSessionId(null);
           setStep("done");
@@ -108,6 +113,7 @@ export const WidgetLoading = ({ organizationId }: Props) => {
   }, [
     step,
     contactSessionId,
+    conversationId,
     validateContactSession,
     setContactSessionId,
     setLoadingMessage,
