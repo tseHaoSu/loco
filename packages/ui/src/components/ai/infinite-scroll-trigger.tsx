@@ -29,12 +29,13 @@ export const InfiniteScrollTrigger = ({
   }
 
   return (
-    <div className={cn("flex justify-center w-full py-2", className)} ref={ref}>
+    <div className={cn("flex justify-center w-full py-4", className)} ref={ref}>
       <Button
         onClick={onLoadMore}
         disabled={!canLoadMore || isLoadingMore}
         size="sm"
-        variant="ghost"
+        variant="outline"
+        className="font-medium"
       >
         {text}
       </Button>

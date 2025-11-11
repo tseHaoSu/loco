@@ -3,6 +3,56 @@ import { mutation, query } from "../_generated/server";
 import { supportAgent } from "../system/agent/supportAgent";
 import { components } from "../_generated/api";
 import { saveMessage } from "@convex-dev/agent";
+import { paginationOptsValidator } from "convex/server";
+
+export const getMany = query({
+  args: {
+    contactSessionId: v.id("contactSessions"),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const contactSession = await ctx.db.get(args.contactSessionId);
+    if (!contactSession || contactSession.expiresAt < Date.now()) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Contact session is invalid or has expired.",
+      });
+    }
+
+    const conversations = await ctx.db
+      .query("conversations")
+      .withIndex("by_contact_session_id", (q) =>
+        q.eq("contactSessionId", args.contactSessionId)
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    const conversationWithLastMessage = await Promise.all(
+      conversations.page.map(async (conversation) => {
+        const messages = await supportAgent.listMessages(ctx, {
+          threadId: conversation.threadId,
+          paginationOpts: { numItems: 1, cursor: null },
+        });
+
+        const lastMessage = messages.page.length > 0 ? messages.page[0] : null;
+
+        return {
+          _id: conversation._id,
+          _creationTime: conversation._creationTime,
+          status: conversation.status,
+          organizationId: conversation.organizationId,
+          threadId: conversation.threadId,
+          lastMessage,
+        };
+      })
+    );
+
+    return {
+      ...conversations,
+      page: conversationWithLastMessage,
+    };
+  },
+});
 
 export const getOneConversation = query({
   args: {
@@ -19,7 +69,7 @@ export const getOneConversation = query({
     }
 
     const conversation = await ctx.db.get(args.conversationId);
-    
+
     if (!conversation) {
       throw new ConvexError({
         code: "NOT_FOUND",
