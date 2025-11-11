@@ -19,7 +19,6 @@ import {
   AIConversationScrollButton,
 } from "@workspace/ui/components/ai/conversation";
 import {
-  AIMessage,
   AIMessageAvatar,
   AIMessageContent,
 } from "@workspace/ui/components/ai/message";
@@ -27,7 +26,6 @@ import {
   AIInput,
   AIInputTextarea,
   AIInputToolbar,
-  AIInputTools,
 } from "@workspace/ui/components/ai/input";
 import { AIResponse } from "@workspace/ui/components/ai/response";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
@@ -45,7 +43,7 @@ export const WidgetChat = () => {
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const previousMessageCountRef = useRef<number>(0);
+  const lastMessageIdRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef<boolean>(true);
   const hasScrolledToBottomRef = useRef<boolean>(false);
 
@@ -53,8 +51,8 @@ export const WidgetChat = () => {
     api.public.conversations.getOneConversation,
     conversationId && contactSessionId
       ? {
-          conversationId: conversationId,
-          contactSessionId: contactSessionId,
+          conversationId,
+          contactSessionId,
         }
       : "skip"
   );
@@ -64,25 +62,20 @@ export const WidgetChat = () => {
     conversation?.threadId && contactSessionId
       ? {
           threadId: conversation.threadId,
-          contactSessionId: contactSessionId,
+          contactSessionId,
         }
       : "skip",
     { initialNumItems: 7 }
   );
 
-  const {
-    topElementRef,
-    handleLoadMore,
-    canLoadMore,
-    isLoadingMore,
-  } = useInfiniteScroll({
-    status: threadMessages.status,
-    loadMore: threadMessages.loadMore,
-    loadSize: 5,
-    observerEnabled: true,
-  });
+  const { topElementRef, handleLoadMore, canLoadMore, isLoadingMore } =
+    useInfiniteScroll({
+      status: threadMessages.status,
+      loadMore: threadMessages.loadMore,
+      loadSize: 5,
+      observerEnabled: false,
+    });
 
-  // Scroll to bottom after initial load to hide the top trigger
   useEffect(() => {
     if (
       !hasScrolledToBottomRef.current &&
@@ -96,23 +89,27 @@ export const WidgetChat = () => {
 
   const sendMessage = useAction(api.public.message.create);
 
-  // Auto-scroll to bottom when new messages arrive (but not on initial load)
   useEffect(() => {
-    const currentMessageCount = threadMessages.results.length;
+    const messages = threadMessages.results;
+    const lastMessage = messages[messages.length - 1];
+    const currentLastMessageId = lastMessage?.id || null;
 
-    // Skip auto-scroll on initial load
-    if (isInitialLoadRef.current && currentMessageCount > 0) {
+    if (isInitialLoadRef.current && messages.length > 0) {
       isInitialLoadRef.current = false;
-      previousMessageCountRef.current = currentMessageCount;
+      lastMessageIdRef.current = currentLastMessageId;
       return;
     }
 
-    // Only scroll if new messages were added
-    if (currentMessageCount > previousMessageCountRef.current) {
+    // Only scroll if the last message ID changed (new message at the end)
+    // Not when loading older messages at the beginning
+    if (
+      currentLastMessageId &&
+      currentLastMessageId !== lastMessageIdRef.current
+    ) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      previousMessageCountRef.current = currentMessageCount;
+      lastMessageIdRef.current = currentLastMessageId;
     }
-  }, [threadMessages.results.length]);
+  }, [threadMessages.results]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,7 +130,7 @@ export const WidgetChat = () => {
       await sendMessage({
         prompt: messageText,
         threadId: conversation.threadId,
-        contactSessionId: contactSessionId,
+        contactSessionId,
       });
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -149,8 +146,7 @@ export const WidgetChat = () => {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header - Fixed at top */}
-      <div className="flex-shrink-0 flex items-center gap-3 border-b px-4 py-3">
+      <div className="flex-shrink-0 flex items-center gap-3 px-4 border-b  py-3">
         <Button
           onClick={handleBack}
           variant="ghost"
@@ -160,16 +156,17 @@ export const WidgetChat = () => {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          {conversation?.status === "resolved" ? (
+            <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+          ) : (
+            <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+          )}
           <span className="text-sm font-medium">
-            {conversation?.status === "resolved"
-              ? "Resolved"
-              : "Active Support"}
+            {conversation?.status === "resolved" ? "Resolved" : "Active"}
           </span>
         </div>
       </div>
 
-      {/* Messages and Input wrapper - Scrollable area */}
       <div className="flex-1 overflow-y-auto min-h-0 relative">
         <AIConversation>
           <AIConversationContent className="pb-4">
@@ -207,7 +204,7 @@ export const WidgetChat = () => {
                     >
                       {!isUser && (
                         <AIMessageAvatar
-                          src="/assistant-avatar.png"
+                          src=""
                           name="AI"
                           className="flex-shrink-0"
                         />
@@ -224,7 +221,6 @@ export const WidgetChat = () => {
                     </div>
                   );
                 })}
-                {/* Scroll anchor */}
                 <div ref={messagesEndRef} />
               </>
             )}
@@ -232,41 +228,37 @@ export const WidgetChat = () => {
           <AIConversationScrollButton />
         </AIConversation>
 
-        {/* Input - Sticky at bottom of scrollable area */}
-        <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-md border-t p-4 shadow-lg">
-        <AIInput onSubmit={handleSendMessage} className="rounded-2xl">
-          <AIInputTextarea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage(e as any);
-              }
-            }}
-            placeholder="Type your message..."
-            disabled={isSending || conversation?.status === "resolved"}
-            rows={1}
-            className="resize-none"
-          />
-          <AIInputToolbar>
-            <AIInputTools>
-              {/* Optional: Add file upload or other tools here */}
-            </AIInputTools>
-            <Button
-              type="submit"
-              size="icon"
-              className="gap-1.5 rounded-md"
-              disabled={
-                !inputValue.trim() ||
-                isSending ||
-                conversation?.status === "resolved"
-              }
-            >
-              <ArrowUp className="h-4 w-4" />
-            </Button>
-          </AIInputToolbar>
-        </AIInput>
+        <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-md p-4 shadow-lg">
+          <AIInput onSubmit={handleSendMessage} className="rounded-2xl">
+            <AIInputTextarea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e as any);
+                }
+              }}
+              placeholder="Type your message..."
+              disabled={isSending || conversation?.status === "resolved"}
+              rows={1}
+              className="resize-none"
+            />
+            <AIInputToolbar>
+              <Button
+                type="submit"
+                size="icon"
+                className="m-1 rounded-md"
+                disabled={
+                  !inputValue.trim() ||
+                  isSending ||
+                  conversation?.status === "resolved"
+                }
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+            </AIInputToolbar>
+          </AIInput>
         </div>
       </div>
     </div>

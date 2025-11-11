@@ -10,6 +10,7 @@ import { WidgetChat } from "../screens/WidgetChat";
 import { WidgetError } from "../screens/WidgetError";
 import { WidgetSelection } from "../screens/WidgetSelection";
 import { WidgetStartCall } from "../screens/WidgetStartCall";
+import { WidgetInbox } from "../screens/WidgetInbox";
 
 interface Props {
   organizationId: string;
@@ -24,7 +25,7 @@ export const WidgetView = ({ organizationId }: Props) => {
     selection: <WidgetSelection />,
     voice: <WidgetStartCall />,
     auth: <WidgetAuth organizationId={organizationId} />,
-    inbox: <p>Inbox Screen</p>,
+    inbox: <WidgetInbox />,
     contact: <p>Contact Screen</p>,
     chat: <WidgetChat />,
   };

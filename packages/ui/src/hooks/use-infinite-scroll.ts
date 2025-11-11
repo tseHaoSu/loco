@@ -10,7 +10,7 @@ interface UseInfiniteScrollProps {
 export const useInfiniteScroll = ({
   status,
   loadMore,
-  loadSize = 20,
+  loadSize = 20, 
   observerEnabled = true,
 }: UseInfiniteScrollProps) => {
   const topElementRef = useRef<HTMLDivElement>(null);
