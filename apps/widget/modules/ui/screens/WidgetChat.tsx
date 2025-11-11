@@ -30,6 +30,8 @@ import {
   AIInputTools,
 } from "@workspace/ui/components/ai/input";
 import { AIResponse } from "@workspace/ui/components/ai/response";
+import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
+import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 
 export const WidgetChat = () => {
   const setScreen = useSetAtom(screenAtom);
@@ -43,6 +45,9 @@ export const WidgetChat = () => {
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousMessageCountRef = useRef<number>(0);
+  const isInitialLoadRef = useRef<boolean>(true);
+  const hasScrolledToBottomRef = useRef<boolean>(false);
 
   const conversation = useQuery(
     api.public.conversations.getOneConversation,
@@ -62,14 +67,51 @@ export const WidgetChat = () => {
           contactSessionId: contactSessionId,
         }
       : "skip",
-    { initialNumItems: 10 }
+    { initialNumItems: 7 }
   );
+
+  const {
+    topElementRef,
+    handleLoadMore,
+    canLoadMore,
+    isLoadingMore,
+  } = useInfiniteScroll({
+    status: threadMessages.status,
+    loadMore: threadMessages.loadMore,
+    loadSize: 5,
+    observerEnabled: true,
+  });
+
+  // Scroll to bottom after initial load to hide the top trigger
+  useEffect(() => {
+    if (
+      !hasScrolledToBottomRef.current &&
+      threadMessages.status !== "LoadingFirstPage" &&
+      threadMessages.results.length > 0
+    ) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+      hasScrolledToBottomRef.current = true;
+    }
+  }, [threadMessages.status, threadMessages.results.length]);
 
   const sendMessage = useAction(api.public.message.create);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive (but not on initial load)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const currentMessageCount = threadMessages.results.length;
+
+    // Skip auto-scroll on initial load
+    if (isInitialLoadRef.current && currentMessageCount > 0) {
+      isInitialLoadRef.current = false;
+      previousMessageCountRef.current = currentMessageCount;
+      return;
+    }
+
+    // Only scroll if new messages were added
+    if (currentMessageCount > previousMessageCountRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      previousMessageCountRef.current = currentMessageCount;
+    }
   }, [threadMessages.results.length]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -131,6 +173,14 @@ export const WidgetChat = () => {
       <div className="flex-1 overflow-y-auto min-h-0 relative">
         <AIConversation>
           <AIConversationContent className="pb-4">
+            <InfiniteScrollTrigger
+              ref={topElementRef}
+              canLoadMore={canLoadMore}
+              isLoadingMore={isLoadingMore}
+              onLoadMore={handleLoadMore}
+              loadMoreText="Load more messages"
+              noMoreText="No more messages"
+            />
             {threadMessages.status === "LoadingFirstPage" ? (
               <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
                 <p className="text-sm text-muted-foreground">
@@ -171,13 +221,6 @@ export const WidgetChat = () => {
                           <AIResponse>{content}</AIResponse>
                         )}
                       </AIMessageContent>
-                      {isUser && (
-                        <AIMessageAvatar
-                          src="/user-avatar.png"
-                          name="Y"
-                          className="flex-shrink-0"
-                        />
-                      )}
                     </div>
                   );
                 })}
