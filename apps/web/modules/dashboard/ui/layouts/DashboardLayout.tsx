@@ -5,7 +5,7 @@ import {
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar";
 import { cookies } from "next/headers";
-import { DashboardSidebar } from "./components/DashboardSidebar";
+import { DashboardSidebar } from "../components/DashboardSidebar";
 
 export const DashboardLayout = async ({
   children,

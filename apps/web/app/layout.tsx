@@ -29,9 +29,15 @@ const RootLayout = ({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
+          className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased relative`}
           suppressHydrationWarning
         >
+          <div
+            className="fixed inset-0 opacity-5 -z-30 pointer-events-none"
+            style={{
+              backgroundImage: "url(/grain.jpg)",
+            }}
+          />
           <Providers>{children}</Providers>
         </body>
       </html>
