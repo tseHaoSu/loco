@@ -8,14 +8,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@workspace/ui/components/avatar";
+import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { usePaginatedQuery } from "convex/react";
-import { ArrowUp, Check, Circle, List, X } from "lucide-react";
+import { ArrowUp, Check, Circle, CornerUpLeft, List, X } from "lucide-react";
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+
+type FilterStatus = "all" | "unresolved" | "escalated" | "resolved";
+
 export const ConversationPanel = () => {
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const pathname = usePathname();
+  const router = useRouter();
+
   const {
     results: conversations,
     status,
@@ -23,12 +28,20 @@ export const ConversationPanel = () => {
   } = usePaginatedQuery(
     api.private.conversations.getMany,
     {
-      status: undefined,
+      status: filterStatus === "all" ? undefined : filterStatus,
     },
     {
       initialNumItems: 10,
     }
   );
+
+  const handleConversationClick = (conversationId: string) => {
+    router.push(`/conversations/${conversationId}`);
+  };
+
+  const isSelected = (conversationId: string) => {
+    return pathname === `/conversations/${conversationId}`;
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -43,47 +56,75 @@ export const ConversationPanel = () => {
     }
   };
 
-  const getMessageContent = (message: any) => {
-    if (!message?.message) return "";
-    const content = message.message.content;
+  const getStatusBorderColor = (status: string): string => {
+    switch (status) {
+      case "unresolved":
+        return "border-red-500";
+      case "escalated":
+        return "border-yellow-500";
+      case "resolved":
+        return "border-green-500";
+      default:
+        return "border-gray-500";
+    }
+  };
+
+  const getMessageContent = (message: any): string => {
+    const content = message?.message?.content;
+    if (!content) return "";
+
     if (typeof content === "string") return content;
     if (Array.isArray(content)) {
-      const textContent = content.find((c) => c.type === "text");
-      return textContent?.text || "";
+      return content.find((c) => c.type === "text")?.text || "";
     }
+
     return "";
   };
 
-  const getAvatarFallback = (email: string) => {
-    const name = email.split("@")[0];
-    return name.slice(0, 2).toUpperCase();
+  const getRelativeTime = (timestamp: number): string => {
+    const now = Date.now();
+    const diffMs = now - timestamp;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
 
   return (
     <div className="flex h-full w-full flex-col bg-background text-sidebar-foreground">
-      <Select defaultValue="all" onValueChange={() => {}}>
-        <SelectTrigger className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-accent focus-visible:ring-0">
-          <List className="h-4 w-4" />
-          <SelectValue placeholder="Filter" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          <SelectItem value="unresolved">
-            <X className="h-4 w-4" />
-            Unresolved
-          </SelectItem>
-          <SelectItem value="escalated">
-            <ArrowUp className="h-4 w-4" />
-            Escalated
-          </SelectItem>
-          <SelectItem value="resolved">
-            <Check className="h-4 w-4" />
-            Resolved
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="flex flex-col gap-3.5 border-b p-2">
+        <Select
+          value={filterStatus}
+          onValueChange={(value) => setFilterStatus(value as FilterStatus)}
+        >
+          <SelectTrigger className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-accent focus-visible:ring-0">
+            <List className="h-4 w-4" />
+            <SelectValue placeholder="Filter" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="unresolved">
+              <X className="h-4 w-4" />
+              Unresolved
+            </SelectItem>
+            <SelectItem value="escalated">
+              <ArrowUp className="h-4 w-4" />
+              Escalated
+            </SelectItem>
+            <SelectItem value="resolved">
+              <Check className="h-4 w-4" />
+              Resolved
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto py-3 ">
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-3">
         {status === "LoadingFirstPage" && (
           <div className="flex items-center justify-center px-4 py-4">
             Loading
@@ -100,36 +141,79 @@ export const ConversationPanel = () => {
         {conversations?.map((conversation) => (
           <div
             key={conversation._id}
-            className="group flex cursor-pointer gap-3 rounded-lg border border-border bg-card px-3 py-3 transition-colors hover:bg-accent"
+            onClick={() => handleConversationClick(conversation._id)}
+            className={`group flex cursor-pointer gap-3 rounded-lg border px-3 py-3 transition-colors hover:bg-accent ${
+              isSelected(conversation._id)
+                ? "border-primary bg-accent"
+                : "border-border bg-card"
+            }`}
           >
-            <Avatar className="h-8 w-8 shrink-0">
-              <AvatarImage src="" />
-              <AvatarFallback className="text-xs">
-                {getAvatarFallback(
-                  conversation.contactSession?.email || "UN"
-                )}
-              </AvatarFallback>
-            </Avatar>
+            <DicebearAvatar
+              seed={conversation.contactSessionId}
+              name={conversation.contactSession?.name}
+              size={40}
+              className="shrink-0"
+            />
 
             <div className="flex flex-1 flex-col gap-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-1 flex-col gap-1">
-                  <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-sm font-medium ${
+                      isSelected(conversation._id)
+                        ? "text-accent-foreground"
+                        : "group-hover:text-accent-foreground"
+                    }`}
+                  >
+                    {conversation.contactSession?.name || "Unknown"}
+                  </span>
+                  <div
+                    className={`flex items-center gap-1 rounded-md border px-1.5 py-0.5 ${getStatusBorderColor(
+                      conversation.status
+                    )}`}
+                  >
                     {getStatusIcon(conversation.status)}
-                    <span className="text-sm font-medium capitalize group-hover:text-accent-foreground">
+                    <span
+                      className={`text-xs capitalize ${
+                        isSelected(conversation._id)
+                          ? "text-accent-foreground"
+                          : "group-hover:text-accent-foreground"
+                      }`}
+                    >
                       {conversation.status}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground group-hover:text-accent-foreground">
-                    {conversation.contactSession?.email || "Unknown contact"}
-                  </p>
                 </div>
+                <span
+                  className={`text-xs ${
+                    isSelected(conversation._id)
+                      ? "text-accent-foreground"
+                      : "text-muted-foreground group-hover:text-accent-foreground"
+                  }`}
+                >
+                  {getRelativeTime(conversation._creationTime)}
+                </span>
               </div>
 
               {conversation.lastMessage && (
-                <p className="line-clamp-2 text-sm text-muted-foreground group-hover:text-accent-foreground">
-                  {getMessageContent(conversation.lastMessage)}
-                </p>
+                <div className="flex items-center gap-2">
+                  <CornerUpLeft
+                    className={`h-3 w-3 shrink-0 ${
+                      isSelected(conversation._id)
+                        ? "text-accent-foreground"
+                        : "text-muted-foreground group-hover:text-accent-foreground"
+                    }`}
+                  />
+                  <p
+                    className={`line-clamp-1 text-sm ${
+                      isSelected(conversation._id)
+                        ? "text-accent-foreground"
+                        : "text-muted-foreground group-hover:text-accent-foreground"
+                    }`}
+                  >
+                    {getMessageContent(conversation.lastMessage)}
+                  </p>
+                </div>
               )}
             </div>
           </div>
