@@ -156,34 +156,16 @@ export const ConversationPanel = () => {
             />
 
             <div className="flex flex-1 flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-sm font-medium ${
-                      isSelected(conversation._id)
-                        ? "text-accent-foreground"
-                        : "group-hover:text-accent-foreground"
-                    }`}
-                  >
-                    {conversation.contactSession?.name || "Unknown"}
-                  </span>
-                  <div
-                    className={`flex items-center gap-1 rounded-md border px-1.5 py-0.5 ${getStatusBorderColor(
-                      conversation.status
-                    )}`}
-                  >
-                    {getStatusIcon(conversation.status)}
-                    <span
-                      className={`text-xs capitalize ${
-                        isSelected(conversation._id)
-                          ? "text-accent-foreground"
-                          : "group-hover:text-accent-foreground"
-                      }`}
-                    >
-                      {conversation.status}
-                    </span>
-                  </div>
-                </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span
+                  className={`text-sm font-medium ${
+                    isSelected(conversation._id)
+                      ? "text-accent-foreground"
+                      : "group-hover:text-accent-foreground"
+                  }`}
+                >
+                  {conversation.contactSession?.name || "Unknown"}
+                </span>
                 <span
                   className={`text-xs ${
                     isSelected(conversation._id)
@@ -195,26 +177,44 @@ export const ConversationPanel = () => {
                 </span>
               </div>
 
-              {conversation.lastMessage && (
-                <div className="flex items-center gap-2">
-                  <CornerUpLeft
-                    className={`h-3 w-3 shrink-0 ${
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                {conversation.lastMessage && (
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <CornerUpLeft
+                      className={`h-3 w-3 shrink-0 ${
+                        isSelected(conversation._id)
+                          ? "text-accent-foreground"
+                          : "text-muted-foreground group-hover:text-accent-foreground"
+                      }`}
+                    />
+                    <p
+                      className={`line-clamp-1 text-sm ${
+                        isSelected(conversation._id)
+                          ? "text-accent-foreground"
+                          : "text-muted-foreground group-hover:text-accent-foreground"
+                      }`}
+                    >
+                      {getMessageContent(conversation.lastMessage)}
+                    </p>
+                  </div>
+                )}
+                <div
+                  className={`flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 ${getStatusBorderColor(
+                    conversation.status
+                  )}`}
+                >
+                  {getStatusIcon(conversation.status)}
+                  <span
+                    className={`text-xs capitalize ${
                       isSelected(conversation._id)
                         ? "text-accent-foreground"
-                        : "text-muted-foreground group-hover:text-accent-foreground"
-                    }`}
-                  />
-                  <p
-                    className={`line-clamp-1 text-sm ${
-                      isSelected(conversation._id)
-                        ? "text-accent-foreground"
-                        : "text-muted-foreground group-hover:text-accent-foreground"
+                        : "group-hover:text-accent-foreground"
                     }`}
                   >
-                    {getMessageContent(conversation.lastMessage)}
-                  </p>
+                    {conversation.status}
+                  </span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         ))}

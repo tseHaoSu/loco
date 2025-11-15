@@ -6,7 +6,7 @@ import { api } from "@workspace/backend/convex/_generated/api";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import {
   AIConversation,
-  AIConversationContent
+  AIConversationContent,
 } from "@workspace/ui/components/ai/conversation";
 import {
   AIInput,
@@ -16,14 +16,14 @@ import {
 } from "@workspace/ui/components/ai/input";
 import {
   AIMessage,
-  AIMessageContent
+  AIMessageContent,
 } from "@workspace/ui/components/ai/message";
 import { AIResponse } from "@workspace/ui/components/ai/response";
 import { Button } from "@workspace/ui/components/button";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { Form, FormControl, FormField } from "@workspace/ui/components/form";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowUp, MoreHorizontalIcon } from "lucide-react";
+import { ArrowUp, MoreHorizontalIcon, Wand2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -121,7 +121,10 @@ export const ConversationView = ({
                 </FormControl>
               )}
             />
-            <AIInputToolbar>
+            <AIInputToolbar className="gap-2">
+              <Button variant="ghost">
+                <Wand2Icon className="h-4 w-4" />
+              </Button>
               <AIInputSubmit>
                 <ArrowUp className="h-4 w-4" />
               </AIInputSubmit>
