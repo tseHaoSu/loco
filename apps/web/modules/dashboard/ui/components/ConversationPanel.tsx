@@ -9,12 +9,27 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
+import { Button } from "@workspace/ui/components/button";
+import { Badge } from "@workspace/ui/components/badge";
 import { usePaginatedQuery } from "convex/react";
 import { ArrowUp, Check, Circle, CornerUpLeft, List, X } from "lucide-react";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 type FilterStatus = "all" | "unresolved" | "escalated" | "resolved";
+
+interface MessageContentPart {
+  type: string;
+  text?: string;
+}
+
+type MessageContent = string | MessageContentPart[];
+
+interface LastMessage {
+  message?: {
+    content?: MessageContent;
+  };
+}
 
 export const ConversationPanel = () => {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
@@ -46,39 +61,55 @@ export const ConversationPanel = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "unresolved":
-        return <X className="h-4 w-4 text-red-500" />;
+        return <X className="h-4 w-4" />;
       case "escalated":
-        return <ArrowUp className="h-4 w-4 text-yellow-500" />;
+        return <ArrowUp className="h-4 w-4" />;
       case "resolved":
-        return <Check className="h-4 w-4 text-green-500" />;
+        return <Check className="h-4 w-4" />;
       default:
         return <Circle className="h-4 w-4" />;
     }
   };
 
-  const getStatusBorderColor = (status: string): string => {
+  const getStatusVariant = (
+    status: string
+  ):
+    | "default"
+    | "secondary"
+    | "destructive"
+    | "outline"
+    | "tertiary"
+    | "warning" => {
     switch (status) {
       case "unresolved":
-        return "border-red-500";
+        return "destructive";
       case "escalated":
-        return "border-yellow-500";
+        return "warning";
       case "resolved":
-        return "border-green-500";
+        return "tertiary";
       default:
-        return "border-gray-500";
+        return "tertiary";
     }
   };
 
-  const getMessageContent = (message: any): string => {
+  const truncateToWords = (text: string, maxWords: number = 5): string => {
+    const words = text.trim().split(/\s+/);
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(" ") + "...";
+  };
+
+  const getMessageContent = (message: LastMessage): string => {
     const content = message?.message?.content;
     if (!content) return "";
 
-    if (typeof content === "string") return content;
-    if (Array.isArray(content)) {
-      return content.find((c) => c.type === "text")?.text || "";
+    let text = "";
+    if (typeof content === "string") {
+      text = content;
+    } else if (Array.isArray(content)) {
+      text = content.find((c) => c.type === "text")?.text || "";
     }
 
-    return "";
+    return truncateToWords(text);
   };
 
   const getRelativeTime = (timestamp: number): string => {
@@ -139,12 +170,13 @@ export const ConversationPanel = () => {
           )}
 
         {conversations?.map((conversation) => (
-          <div
+          <Button
             key={conversation._id}
             onClick={() => handleConversationClick(conversation._id)}
-            className={`group flex cursor-pointer gap-3 rounded-lg border px-3 py-3 transition-colors hover:bg-accent ${
+            variant="ghost"
+            className={`group h-auto w-full justify-start gap-3 rounded-lg border px-3 py-3 transition-colors hover:bg-accent ${
               isSelected(conversation._id)
-                ? "border-primary bg-accent"
+                ? "border-primary bg-gradient-to-r from-orange-500/10 to-orange-600/10"
                 : "border-border bg-card"
             }`}
           >
@@ -160,8 +192,8 @@ export const ConversationPanel = () => {
                 <span
                   className={`text-sm font-medium ${
                     isSelected(conversation._id)
-                      ? "text-accent-foreground"
-                      : "group-hover:text-accent-foreground"
+                      ? "text-foreground"
+                      : "text-foreground group-hover:text-accent-foreground"
                   }`}
                 >
                   {conversation.contactSession?.name || "Unknown"}
@@ -169,7 +201,7 @@ export const ConversationPanel = () => {
                 <span
                   className={`text-xs ${
                     isSelected(conversation._id)
-                      ? "text-accent-foreground"
+                      ? "text-foreground/70"
                       : "text-muted-foreground group-hover:text-accent-foreground"
                   }`}
                 >
@@ -183,14 +215,14 @@ export const ConversationPanel = () => {
                     <CornerUpLeft
                       className={`h-3 w-3 shrink-0 ${
                         isSelected(conversation._id)
-                          ? "text-accent-foreground"
+                          ? "text-foreground/70"
                           : "text-muted-foreground group-hover:text-accent-foreground"
                       }`}
                     />
                     <p
                       className={`line-clamp-1 text-sm ${
                         isSelected(conversation._id)
-                          ? "text-accent-foreground"
+                          ? "text-foreground/70"
                           : "text-muted-foreground group-hover:text-accent-foreground"
                       }`}
                     >
@@ -198,25 +230,13 @@ export const ConversationPanel = () => {
                     </p>
                   </div>
                 )}
-                <div
-                  className={`flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 ${getStatusBorderColor(
-                    conversation.status
-                  )}`}
-                >
+                <Badge variant={getStatusVariant(conversation.status)}>
                   {getStatusIcon(conversation.status)}
-                  <span
-                    className={`text-xs capitalize ${
-                      isSelected(conversation._id)
-                        ? "text-accent-foreground"
-                        : "group-hover:text-accent-foreground"
-                    }`}
-                  >
-                    {conversation.status}
-                  </span>
-                </div>
+                  <span className="capitalize">{conversation.status}</span>
+                </Badge>
               </div>
             </div>
-          </div>
+          </Button>
         ))}
 
         {status === "CanLoadMore" && (

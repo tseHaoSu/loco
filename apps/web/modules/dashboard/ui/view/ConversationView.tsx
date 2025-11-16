@@ -10,6 +10,7 @@ import {
 } from "@workspace/ui/components/ai/conversation";
 import {
   AIInput,
+  AIInputButton,
   AIInputSubmit,
   AIInputTextarea,
   AIInputToolbar,
@@ -26,6 +27,8 @@ import { useMutation, useQuery } from "convex/react";
 import { ArrowUp, MoreHorizontalIcon, Wand2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ConversationStatus } from "../components/ConversationStatus";
+import { useState } from "react";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -36,6 +39,8 @@ export const ConversationView = ({
 }: {
   conversationId: Id<"conversations">;
 }) => {
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
   const conversation = useQuery(api.private.conversations.getOne, {
     conversationId,
   });
@@ -67,12 +72,50 @@ export const ConversationView = ({
     }
   };
 
+  const updateConversationStatus = useMutation(
+    api.private.conversations.updateStatus
+  );
+
+  const handleToggleStatus = async () => {
+    if (!conversation) return;
+
+    setIsUpdatingStatus(true);
+    let newStatus: "unresolved" | "resolved" | "escalated";
+
+    if (conversation.status === "unresolved") {
+      newStatus = "resolved";
+    } else if (conversation.status === "resolved") {
+      newStatus = "escalated";
+    } else {
+      newStatus = "unresolved";
+    }
+
+    try {
+      await updateConversationStatus({
+        conversationId: conversationId,
+        status: newStatus,
+      });
+      console.log("Conversation status updated to:", newStatus);
+    } catch (error) {
+      console.error("Failed to update conversation status:", error);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col bg-muted">
       <header className="flex items-center justify-between border-b bg-background p-2.5">
         <Button size="sm" variant="ghost">
           <MoreHorizontalIcon />
         </Button>
+        {conversation && (
+          <ConversationStatus
+            onClick={handleToggleStatus}
+            status={conversation.status}
+            disabled={isUpdatingStatus}
+          />
+        )}
       </header>
 
       <AIConversation className="max-h-[calc(100vh-53px)]">
@@ -122,9 +165,10 @@ export const ConversationView = ({
               )}
             />
             <AIInputToolbar className="gap-2">
-              <Button variant="ghost">
+              <AIInputButton disabled={conversation?.status === "resolved"}>
                 <Wand2Icon className="h-4 w-4" />
-              </Button>
+                Enhance
+              </AIInputButton>
               <AIInputSubmit>
                 <ArrowUp className="h-4 w-4" />
               </AIInputSubmit>

@@ -364,19 +364,44 @@ import { cn } from "@workspace/ui/lib/utils"
 
 ### TypeScript
 
-1. **Strict Type Safety**
-   - Always use TypeScript, never `any` without justification
-   - Define interfaces/types for component props
-   - Use Zod for runtime validation
+1. **Strict Type Safety - NEVER USE `any`**
+   - **CRITICAL:** Never use the `any` type. Always create proper type definitions or interfaces.
+   - Define explicit interfaces/types for all component props, function parameters, and return values
+   - Use Zod for runtime validation and infer types from schemas
+   - If the type is truly unknown, use `unknown` and perform type guards
+   - For edge cases, prefer `Record<string, unknown>` over `any`
 
 2. **Type Definitions**
    ```typescript
-   // Good - explicit types
-   interface ConversationPanelProps {
-     initialStatus?: FilterStatus;
+   // ❌ WRONG - Never use any
+   function handleData(data: any) {
+     return data.value;
    }
 
-   // Good - inferred from Zod
+   // ✅ CORRECT - Define proper interfaces
+   interface DataPayload {
+     value: string;
+     timestamp: number;
+   }
+   function handleData(data: DataPayload) {
+     return data.value;
+   }
+
+   // ✅ CORRECT - Use unknown with type guards
+   function handleUnknownData(data: unknown) {
+     if (typeof data === 'object' && data !== null && 'value' in data) {
+       return (data as { value: string }).value;
+     }
+     throw new Error('Invalid data structure');
+   }
+
+   // ✅ CORRECT - Explicit prop interfaces
+   interface ConversationPanelProps {
+     initialStatus?: FilterStatus;
+     onStatusChange?: (status: FilterStatus) => void;
+   }
+
+   // ✅ CORRECT - Infer types from Zod schemas
    const messageSchema = z.object({
      content: z.string(),
      role: z.enum(["user", "assistant"])
@@ -863,8 +888,8 @@ npx convex env set CLERK_JWT_ISSUER_DOMAIN https://your-clerk-domain.clerk.accou
 
 ### Common Pitfalls to Avoid
 
-1. ❌ **Forgetting `organizationId` filter** - Always scope queries
-2. ❌ **Using `any` type** - Use proper TypeScript types
+1. ❌ **NEVER use `any` type** - ALWAYS create proper interfaces and type definitions
+2. ❌ **Forgetting `organizationId` filter** - Always scope queries to organizations
 3. ❌ **Importing from wrong package** - Use `@workspace/*` packages
 4. ❌ **Ignoring auth** - Always check authentication in Convex functions
 5. ❌ **Breaking module boundaries** - Keep modules decoupled
@@ -878,7 +903,7 @@ npx convex env set CLERK_JWT_ISSUER_DOMAIN https://your-clerk-domain.clerk.accou
 ### Documentation Resources
 
 - **Next.js:** https://nextjs.org/docs
-- **Convex:** https://docs.convex.dev
+u- **Convex:** https://docs.convex.dev
 - **Clerk:** https://clerk.com/docs
 - **shadcn/ui:** https://ui.shadcn.com
 - **Turborepo:** https://turbo.build/repo/docs
@@ -898,6 +923,7 @@ For project-specific questions:
 
 | Date | Changes |
 |------|---------|
+| 2025-11-16 | Strengthened TypeScript conventions - made `any` type prohibition absolute with clear examples and moved to top priority in Common Pitfalls |
 | 2025-11-15 | Initial CLAUDE.md creation - comprehensive documentation of codebase structure, tech stack, development workflows, and conventions |
 
 ---

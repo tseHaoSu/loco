@@ -40,6 +40,10 @@ export const updateStatus = mutation({
         message: "Conversation not found.",
       });
     }
+
+    await ctx.db.patch(args.conversationId, {
+      status: args.status,
+    });
   },
 });
 
