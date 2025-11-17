@@ -128,7 +128,7 @@ export const ConversationPanel = () => {
 
   return (
     <div className="flex h-full w-full flex-col bg-background text-sidebar-foreground">
-      <div className="flex flex-col gap-3.5 border-b p-2">
+      <div className="border-b p-2">
         <Select
           value={filterStatus}
           onValueChange={(value) => setFilterStatus(value as FilterStatus)}
@@ -155,7 +155,7 @@ export const ConversationPanel = () => {
         </Select>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-3">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-3">
         {status === "LoadingFirstPage" && (
           <div className="flex items-center justify-center px-4 py-4">
             Loading
@@ -187,10 +187,10 @@ export const ConversationPanel = () => {
               className="shrink-0"
             />
 
-            <div className="flex flex-1 flex-col gap-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <div className="flex min-w-0 flex-nowrap items-center justify-between gap-2">
                 <span
-                  className={`text-sm font-medium ${
+                  className={`min-w-0 truncate text-sm font-medium ${
                     isSelected(conversation._id)
                       ? "text-foreground"
                       : "text-foreground group-hover:text-accent-foreground"
@@ -199,7 +199,7 @@ export const ConversationPanel = () => {
                   {conversation.contactSession?.name || "Unknown"}
                 </span>
                 <span
-                  className={`text-xs ${
+                  className={`shrink-0 text-xs ${
                     isSelected(conversation._id)
                       ? "text-foreground/70"
                       : "text-muted-foreground group-hover:text-accent-foreground"
@@ -209,7 +209,7 @@ export const ConversationPanel = () => {
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-nowrap items-center justify-between gap-2">
                 {conversation.lastMessage && (
                   <div className="flex min-w-0 flex-1 items-center gap-2">
                     <CornerUpLeft
@@ -220,7 +220,7 @@ export const ConversationPanel = () => {
                       }`}
                     />
                     <p
-                      className={`line-clamp-1 text-sm ${
+                      className={`min-w-0 truncate text-sm ${
                         isSelected(conversation._id)
                           ? "text-foreground/70"
                           : "text-muted-foreground group-hover:text-accent-foreground"
@@ -230,7 +230,7 @@ export const ConversationPanel = () => {
                     </p>
                   </div>
                 )}
-                <Badge variant={getStatusVariant(conversation.status)}>
+                <Badge variant={getStatusVariant(conversation.status)} className="shrink-0">
                   {getStatusIcon(conversation.status)}
                   <span className="capitalize">{conversation.status}</span>
                 </Badge>

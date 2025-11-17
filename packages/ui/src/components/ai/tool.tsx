@@ -102,12 +102,12 @@ export const AIToolParameters = ({
   parameters,
   ...props
 }: AIToolParametersProps) => (
-  <div className={cn("space-y-2", className)} {...props}>
-    <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+  <div className={cn("flex flex-col gap-2", className)} {...props}>
+    <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
       Parameters
     </h4>
     <div className="rounded-md bg-muted/50 p-3">
-      <pre className="overflow-x-auto text-muted-foreground text-xs">
+      <pre className="overflow-x-auto text-xs text-muted-foreground">
         {JSON.stringify(parameters, null, 2)}
       </pre>
     </div>
@@ -130,8 +130,8 @@ export const AIToolResult = ({
   }
 
   return (
-    <div className={cn("space-y-2", className)} {...props}>
-      <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+    <div className={cn("flex flex-col gap-2", className)} {...props}>
+      <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {error ? "Error" : "Result"}
       </h4>
       <div

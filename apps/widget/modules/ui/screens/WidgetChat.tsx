@@ -73,7 +73,7 @@ export const WidgetChat = () => {
       status: threadMessages.status,
       loadMore: threadMessages.loadMore,
       loadSize: 5,
-      observerEnabled: false,
+      observerEnabled: true,
     });
 
   useEffect(() => {
@@ -106,6 +106,16 @@ export const WidgetChat = () => {
       currentLastMessageId &&
       currentLastMessageId !== lastMessageIdRef.current
     ) {
+      console.log("[WidgetChat] New message received:", {
+        role: lastMessage?.message?.role,
+        content: lastMessage?.text,
+        messageId: currentLastMessageId,
+      });
+
+      if (lastMessage?.message?.role === "assistant") {
+        console.log("[WidgetChat] Assistant reply:", lastMessage.text);
+      }
+
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       lastMessageIdRef.current = currentLastMessageId;
     }
@@ -146,7 +156,7 @@ export const WidgetChat = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 border-b">
+      <div className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
         <Button
           onClick={handleBack}
           variant="ghost"
@@ -157,9 +167,9 @@ export const WidgetChat = () => {
         </Button>
         <div className="flex items-center gap-2">
           {conversation?.status === "resolved" ? (
-            <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
           ) : (
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
           )}
           <span className="text-sm font-medium">
             {conversation?.status === "resolved" ? "Resolved" : "Active"}
@@ -167,9 +177,9 @@ export const WidgetChat = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0 relative">
+      <div className="relative min-h-0 flex-1 overflow-y-auto">
         <AIConversation>
-          <AIConversationContent className="p-0 pt-2 pb-4 px-4">
+          <AIConversationContent className="px-4 pb-4 pt-2">
             <InfiniteScrollTrigger
               ref={topElementRef}
               canLoadMore={canLoadMore}
@@ -179,48 +189,54 @@ export const WidgetChat = () => {
               noMoreText="No more messages"
             />
             {threadMessages.status === "LoadingFirstPage" ? (
-              <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
+              <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
                 <p className="text-sm text-muted-foreground">
                   Loading messages...
                 </p>
               </div>
             ) : threadMessages.results.length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
+              <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
                 <p className="text-sm text-muted-foreground">
                   No messages yet. Start the conversation!
                 </p>
               </div>
             ) : (
               <>
-                {threadMessages.results.map((message: any, index: number) => {
-                  const isUser = message.message?.role === "user";
-                  const content = message.text || "";
-                  return (
-                    <div
-                      key={message.id || `message-${index}`}
-                      className={`flex w-full gap-3 py-2 ${
-                        isUser ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      {!isUser && (
-                        <AIMessageAvatar
-                          src=""
-                          name="AI"
-                          className="flex-shrink-0"
-                        />
-                      )}
-                      <AIMessageContent
-                        className={`max-w-[80%] break-words overflow-hidden ${isUser ? "bg-[#CC785C] text-white border-transparent" : ""}`}
+                {threadMessages.results
+                  .filter((message: any) => {
+                    // Filter out messages with empty or whitespace-only content
+                    const content = message.text || "";
+                    return content.trim().length > 0;
+                  })
+                  .map((message: any, index: number) => {
+                    const isUser = message.message?.role === "user";
+                    const content = message.text || "";
+                    return (
+                      <div
+                        key={message.id || `message-${index}`}
+                        className={`flex w-full gap-3 py-2 ${
+                          isUser ? "justify-end" : "justify-start"
+                        }`}
                       >
-                        {isUser ? (
-                          <p className="text-sm break-words">{content}</p>
-                        ) : (
-                          <AIResponse>{content}</AIResponse>
+                        {!isUser && (
+                          <AIMessageAvatar
+                            src=""
+                            name="AI"
+                            className="shrink-0"
+                          />
                         )}
-                      </AIMessageContent>
-                    </div>
-                  );
-                })}
+                        <AIMessageContent
+                          className={`max-w-[80%] overflow-hidden break-words ${isUser ? "border-transparent bg-[#CC785C] text-white" : ""}`}
+                        >
+                          {isUser ? (
+                            <p className="break-words text-sm">{content}</p>
+                          ) : (
+                            <AIResponse>{content}</AIResponse>
+                          )}
+                        </AIMessageContent>
+                      </div>
+                    );
+                  })}
                 <div ref={messagesEndRef} />
               </>
             )}
@@ -228,7 +244,7 @@ export const WidgetChat = () => {
           <AIConversationScrollButton />
         </AIConversation>
 
-        <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-md p-4 shadow-lg">
+        <div className="sticky bottom-0 z-10 bg-background/80 p-4 shadow-lg backdrop-blur-md">
           <AIInput onSubmit={handleSendMessage} className="rounded-2xl">
             <AIInputTextarea
               value={inputValue}
