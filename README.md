@@ -10,27 +10,54 @@ An AI-powered voice assistant designed to solve customer issues through natural 
 
 ## Tech Stack
 
-### Frontend
-- **Next.js 15** - React framework with App Router
-- **React 19** - UI library
-- **TypeScript** - Type-safe development
-- **shadcn/ui** - Reusable UI component library
-- **Tailwind CSS** - Utility-first styling
-- **Vapi AI** - Voice AI integration for natural conversations
-- **Jotai** - State management
+### Core Framework & Runtime
+- **Next.js 15.4+** - React framework with App Router and Turbopack bundler
+- **React 19.1+** - Latest UI library with concurrent features
+- **TypeScript 5.7+** - Type-safe development with strict mode
+- **Node.js ≥20** - Runtime environment
 
-### Backend
-- **Convex** - Backend-as-a-service with real-time database
-- **Convex Agents** - AI agent orchestration
-- **Clerk** - Authentication and user management
-- **OpenAI SDK** - AI model integration
-- **Zod** - Runtime type validation
+### Build & Development Tools
+- **Turborepo 2.5+** - High-performance monorepo build system with intelligent caching
+- **pnpm 10.20+** - Fast, disk space efficient package manager
+- **Turbopack** - Next-generation bundler for development (Next.js `--turbopack` flag)
+- **ESLint** - Code quality and linting
+- **Prettier** - Consistent code formatting
 
-### Development Tools
-- **Turborepo** - Monorepo build system
-- **pnpm** - Fast, disk space efficient package manager
-- **ESLint** - Code linting
-- **Prettier** - Code formatting
+### Backend & Data
+- **Convex 1.28+** - Backend-as-a-Service with real-time database, serverless functions, and file storage
+- **@convex-dev/agent 0.2+** - AI agent framework for conversation orchestration
+- **Zod 3.25+** - TypeScript-first schema validation with runtime type safety
+
+### Authentication & Authorization
+- **Clerk** - Complete authentication solution with multi-organization support
+  - `@clerk/nextjs` - Frontend authentication components
+  - `@clerk/backend` - Backend authentication for Convex integration
+
+### UI & Styling
+- **shadcn/ui** - High-quality component library built on Radix UI primitives
+- **Tailwind CSS 4.1+** - Utility-first CSS framework with new CSS-first configuration
+- **Radix UI** - Unstyled, accessible component primitives
+- **lucide-react** - Beautiful and consistent icon library
+- **next-themes** - Theme management with dark mode support
+- **class-variance-authority** - CVA for managing component variants
+- **Dicebear** - Avatar generation library
+
+### State Management
+- **Jotai 2.15+** - Atomic state management for widget application
+- **React Hook Form 7.66+** - Performant form state management
+- **@hookform/resolvers** - Form validation resolvers for Zod integration
+
+### AI & Voice Integration
+- **@ai-sdk/openai** - OpenAI SDK integration
+- **@ai-sdk/react** - AI hooks for React components
+- **ai** - Vercel AI SDK for AI-powered features
+- **@vapi-ai/web** - Voice AI integration for natural voice conversations (widget only)
+
+### Utilities & Other Libraries
+- **date-fns 4.1+** - Modern date utility library
+- **react-markdown** - Markdown rendering in React
+- **recharts** - Composable charting library for data visualization
+- **sonner** - Elegant toast notifications
 
 ## Monorepo Structure
 
