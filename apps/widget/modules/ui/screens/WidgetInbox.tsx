@@ -9,7 +9,13 @@ import {
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Button } from "@workspace/ui/components/button";
 import { useAtomValue, useSetAtom } from "jotai";
-import { MessageSquare, Clock, CheckCircle, AlertTriangle, Circle } from "lucide-react";
+import {
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  Circle,
+} from "lucide-react";
 import { usePaginatedQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -23,7 +29,11 @@ export const WidgetInbox = () => {
     conversationIdAtomFamily(organizationId || "")
   );
 
-  const { results: conversations, status, loadMore } = usePaginatedQuery(
+  const {
+    results: conversations,
+    status,
+    loadMore,
+  } = usePaginatedQuery(
     api.public.conversations.getMany,
     contactSessionId
       ? {
@@ -39,24 +49,34 @@ export const WidgetInbox = () => {
   };
 
   return (
-    <div className="flex flex-col h-full px-4">
-      <div className="max-w-2xl mx-auto w-full space-y-4">
-        <div className="flex items-center justify-between py-2">
-          <h2 className="text-lg font-semibold">Conversations</h2>
-        </div>
-
-        {status === "LoadingFirstPage" ? (
-          <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+    <div className="flex flex-col h-full px-4 py-5">
+      <div className="max-w-2xl mx-auto w-full flex flex-col gap-4">
+        {!contactSessionId ? (
+          <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
+            <div className="rounded-full bg-muted/50 p-4">
+              <MessageSquare className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-muted-foreground">
+                No conversations yet
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Start a new conversation from the home screen
+              </p>
+            </div>
+          </div>
+        ) : status === "LoadingFirstPage" ? (
+          <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
             <p className="text-sm text-muted-foreground">
               Loading conversations...
             </p>
           </div>
-        ) : conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+        ) : conversations && conversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
             <div className="rounded-full bg-muted/50 p-4">
               <MessageSquare className="h-12 w-12 text-muted-foreground" />
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <p className="text-sm text-muted-foreground">
                 No conversations yet
               </p>
@@ -66,7 +86,7 @@ export const WidgetInbox = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             {conversations.map((conversation: any) => (
               <Button
                 key={conversation._id}
@@ -96,8 +116,7 @@ export const WidgetInbox = () => {
                     </div>
                     {conversation.lastMessage && (
                       <p className="text-sm text-muted-foreground truncate">
-                        {conversation.lastMessage.text ||
-                          "No message preview"}
+                        {conversation.lastMessage.text || "No message preview"}
                       </p>
                     )}
                   </div>

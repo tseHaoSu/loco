@@ -36,7 +36,6 @@ npm-debug.log*
 *.pem
 
 # Claude Code
-CLAUDE.md
 .claude
 
 

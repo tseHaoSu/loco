@@ -146,7 +146,7 @@ export const WidgetChat = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-shrink-0 flex items-center gap-3 px-4 border-b  py-3">
+      <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 border-b">
         <Button
           onClick={handleBack}
           variant="ghost"
@@ -169,7 +169,7 @@ export const WidgetChat = () => {
 
       <div className="flex-1 overflow-y-auto min-h-0 relative">
         <AIConversation>
-          <AIConversationContent className="pb-4">
+          <AIConversationContent className="p-0 pt-2 pb-4 px-4">
             <InfiniteScrollTrigger
               ref={topElementRef}
               canLoadMore={canLoadMore}
@@ -179,13 +179,13 @@ export const WidgetChat = () => {
               noMoreText="No more messages"
             />
             {threadMessages.status === "LoadingFirstPage" ? (
-              <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+              <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
                 <p className="text-sm text-muted-foreground">
                   Loading messages...
                 </p>
               </div>
             ) : threadMessages.results.length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+              <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
                 <p className="text-sm text-muted-foreground">
                   No messages yet. Start the conversation!
                 </p>
@@ -210,10 +210,10 @@ export const WidgetChat = () => {
                         />
                       )}
                       <AIMessageContent
-                        className={`max-w-[80%] ${isUser ? "bg-[#CC785C] text-white border-transparent" : ""}`}
+                        className={`max-w-[80%] break-words overflow-hidden ${isUser ? "bg-[#CC785C] text-white border-transparent" : ""}`}
                       >
                         {isUser ? (
-                          <p className="text-sm">{content}</p>
+                          <p className="text-sm break-words">{content}</p>
                         ) : (
                           <AIResponse>{content}</AIResponse>
                         )}

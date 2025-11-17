@@ -89,11 +89,11 @@ export const WidgetSelection = () => {
   };
 
   return (
-    <div className="px-4">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="px-4 pt-4">
+      <div className="max-w-2xl mx-auto flex flex-col gap-6">
         <div className="rounded-lg border bg-card p-6 shadow-sm">
           <div className="flex flex-col items-center gap-4">
-            <div className="text-center space-y-2">
+            <div className="text-center flex flex-col gap-2">
               <h2 className="text-lg font-semibold">Start a Conversation</h2>
               <p className="text-sm text-muted-foreground">
                 Create a new conversation to get help

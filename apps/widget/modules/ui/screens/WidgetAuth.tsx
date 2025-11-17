@@ -71,9 +71,9 @@ export const WidgetAuth = ({ organizationId }: WidgetAuthProps) => {
 
   return (
     <div className="px-4">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto flex flex-col gap-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <FormField
               control={form.control}
               name="name"
