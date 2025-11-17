@@ -1,8 +1,11 @@
 import { ConvexError, v } from "convex/values";
 import { action, query } from "../_generated/server";
-import { internal } from "../_generated/api";
+import { components, internal } from "../_generated/api";
 import { supportAgent } from "../system/agent/supportAgent";
 import { paginationOptsValidator } from "convex/server";
+import { resolveConversationTool } from "../system/agent/resolveConversationTool";
+import { escalateConversationTool } from "../system/agent/escalateConversation";
+import { saveMessage } from "@convex-dev/agent";
 
 export const create = action({
   args: {
@@ -42,13 +45,42 @@ export const create = action({
       });
     }
 
-    await supportAgent.generateText(
-      ctx,
-      { threadId: args.threadId },
-      {
-        prompt: args.prompt,
+    //TODO: Implement subscription checks
+    const shouldTriggerAgent = conversation.status === "unresolved";
+
+    if (shouldTriggerAgent) {
+      const result = await supportAgent.generateText(
+        ctx,
+        { threadId: args.threadId },
+        {
+          prompt: args.prompt,
+          tools: { escalateConversationTool, resolveConversationTool },
+        }
+      );
+
+      if (result.toolResults && result.toolResults.length > 0 && !result.text) {
+        const toolOutput = result.toolResults[0].output as string;
+
+        if (toolOutput && toolOutput.trim()) {
+          await saveMessage(ctx, components.agent, {
+            threadId: args.threadId,
+            agentName: "supportAgent",
+            message: {
+              role: "assistant",
+              content: toolOutput,
+            },
+          });
+        }
       }
-    );
+    } else {
+      await saveMessage(ctx, components.agent, {
+        threadId: args.threadId,
+        message: {
+          role: "user",
+          content: args.prompt,
+        },
+      });
+    }
   },
 });
 
@@ -69,9 +101,9 @@ export const getMany = query({
     }
 
     const paginated = await supportAgent.listMessages(ctx, {
-        threadId: args.threadId,
-        paginationOpts: args.paginationOpts,
-      });
+      threadId: args.threadId,
+      paginationOpts: args.paginationOpts,
+    });
 
     return paginated;
   },

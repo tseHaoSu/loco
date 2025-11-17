@@ -23,6 +23,8 @@ import { AIResponse } from "@workspace/ui/components/ai/response";
 import { Button } from "@workspace/ui/components/button";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { Form, FormControl, FormField } from "@workspace/ui/components/form";
+import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
+import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 import { useMutation, useQuery } from "convex/react";
 import { ArrowUp, MoreHorizontalIcon, Wand2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -50,6 +52,14 @@ export const ConversationView = ({
     conversation?.threadId ? { threadId: conversation.threadId } : "skip",
     { initialNumItems: 10 }
   );
+
+  const { topElementRef, handleLoadMore, canLoadMore, isLoadingMore } =
+    useInfiniteScroll({
+      status: messages.status,
+      loadMore: messages.loadMore,
+      loadSize: 10,
+      observerEnabled: true,
+    });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -120,6 +130,14 @@ export const ConversationView = ({
 
       <AIConversation className="max-h-[calc(100vh-53px)]">
         <AIConversationContent>
+          <InfiniteScrollTrigger
+            ref={topElementRef}
+            canLoadMore={canLoadMore}
+            isLoadingMore={isLoadingMore}
+            onLoadMore={handleLoadMore}
+            loadMoreText="Load older messages"
+            noMoreText="No older messages"
+          />
           {toUIMessages(messages.results ?? [])?.map((message) => (
             <AIMessage
               key={message.key}

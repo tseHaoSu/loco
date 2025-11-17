@@ -903,7 +903,7 @@ npx convex env set CLERK_JWT_ISSUER_DOMAIN https://your-clerk-domain.clerk.accou
 4. **Update types** - Keep TypeScript types in sync
 5. **Check imports** - Use workspace packages correctly
 
-### When Debugging
+#pros a## When Debugging
 
 1. **Check auth** - Verify Clerk and Convex auth setup
 2. **Inspect queries** - Review Convex dashboard for query performance

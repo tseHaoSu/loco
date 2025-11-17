@@ -4,6 +4,8 @@ import { components, internal } from "../_generated/api";
 import { supportAgent } from "../system/agent/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
+import { generateText } from "ai";
+
 
 export const create = mutation({
   args: {

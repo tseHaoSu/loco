@@ -13,11 +13,11 @@ export const WidgetHeader = ({
   return (
     <header
       className={cn(
-        "relative border-b border-white/10 bg-gradient-to-br from-background/80 via-muted/10 to-accent/5 p-4 backdrop-blur-md shadow-lg",
+        "relative border-b border-white/10 bg-gradient-to-br from-background/80 via-muted/10 to-accent/5 p-4 shadow-lg backdrop-blur-md",
         className
       )}
     >
-      <div className="text-center space-y-1">
+      <div className="flex flex-col gap-1 text-center">
         <h1 className="text-2xl font-bold">Voice Assistant</h1>
         <p className="text-sm text-muted-foreground">
           Click the button below to start a conversation
