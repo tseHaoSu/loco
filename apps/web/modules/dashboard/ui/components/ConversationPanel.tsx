@@ -230,9 +230,11 @@ export const ConversationPanel = () => {
                     </p>
                   </div>
                 )}
-                <Badge variant={getStatusVariant(conversation.status)} className="shrink-0">
+                <Badge
+                  variant={getStatusVariant(conversation.status)}
+                  className="shrink-0 rounded-full p-1.5"
+                >
                   {getStatusIcon(conversation.status)}
-                  <span className="capitalize">{conversation.status}</span>
                 </Badge>
               </div>
             </div>

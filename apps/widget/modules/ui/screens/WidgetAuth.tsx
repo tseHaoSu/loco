@@ -70,7 +70,7 @@ export const WidgetAuth = ({ organizationId }: WidgetAuthProps) => {
   };
 
   return (
-    <div className="px-4">
+    <div className="px-4 pt-4">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">

@@ -71,10 +71,8 @@ export const getOneConversation = query({
     const conversation = await ctx.db.get(args.conversationId);
 
     if (!conversation) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Conversation not found.",
-      });
+      // Return null instead of throwing error to allow graceful handling in UI
+      return null;
     }
     if (conversation.contactSessionId !== session._id) {
       throw new ConvexError({

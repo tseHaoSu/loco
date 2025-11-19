@@ -25,8 +25,9 @@ import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { Form, FormControl, FormField } from "@workspace/ui/components/form";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
-import { useMutation, useQuery } from "convex/react";
-import { ArrowUp, MoreHorizontalIcon, Wand2Icon } from "lucide-react";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ArrowUp, Loader2, MoreHorizontalIcon, Wand2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ConversationStatus } from "../components/ConversationStatus";
@@ -42,6 +43,7 @@ export const ConversationView = ({
   conversationId: Id<"conversations">;
 }) => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   const conversation = useQuery(api.private.conversations.getOne, {
     conversationId,
@@ -69,6 +71,23 @@ export const ConversationView = ({
   });
 
   const createMessage = useMutation(api.private.messages.create);
+
+  const enhanceResponse = useAction(api.private.messages.enhanceResponse);
+
+  const handleEnhanceResponse = async () => {
+    const currentValue = form.getValues("message");
+    if (!currentValue.trim()) return;
+
+    setIsEnhancing(true);
+    try {
+      const response = await enhanceResponse({ prompt: currentValue });
+      form.setValue("message", response);
+    } catch (error) {
+      console.error("Failed to enhance message:", error);
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -183,9 +202,16 @@ export const ConversationView = ({
               )}
             />
             <AIInputToolbar className="gap-2">
-              <AIInputButton disabled={conversation?.status === "resolved"}>
-                <Wand2Icon className="h-4 w-4" />
-                Enhance
+              <AIInputButton
+                disabled={conversation?.status === "resolved" || isEnhancing}
+                onClick={handleEnhanceResponse}
+              >
+                {isEnhancing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Wand2Icon className="h-4 w-4" />
+                )}
+                {isEnhancing ? "Enhancing..." : "Enhance"}
               </AIInputButton>
               <AIInputSubmit>
                 <ArrowUp className="h-4 w-4" />
@@ -193,6 +219,76 @@ export const ConversationView = ({
             </AIInputToolbar>
           </AIInput>
         </Form>
+      </div>
+    </div>
+  );
+};
+
+export const ConversationLoadingSkeleton = () => {
+  return (
+    <div className="flex h-full flex-col bg-muted">
+      {/* Header Skeleton */}
+      <header className="flex items-center justify-between border-b bg-background p-2.5">
+        <Skeleton className="h-9 w-9 rounded-md" />
+        <Skeleton className="h-8 w-24 rounded-full" />
+      </header>
+
+      {/* Messages Area Skeleton */}
+      <div className="flex-1 overflow-hidden p-4">
+        <div className="flex flex-col gap-6">
+          {/* AI Message Skeleton */}
+          <div className="flex items-start gap-3">
+            <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-64 rounded-md" />
+              <Skeleton className="h-4 w-48 rounded-md" />
+            </div>
+          </div>
+
+          {/* User Message Skeleton */}
+          <div className="flex items-start justify-end gap-3">
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-40 rounded-md" />
+            </div>
+          </div>
+
+          {/* AI Message Skeleton */}
+          <div className="flex items-start gap-3">
+            <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-72 rounded-md" />
+              <Skeleton className="h-4 w-56 rounded-md" />
+              <Skeleton className="h-4 w-64 rounded-md" />
+            </div>
+          </div>
+
+          {/* User Message Skeleton */}
+          <div className="flex items-start justify-end gap-3">
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-52 rounded-md" />
+              <Skeleton className="h-4 w-36 rounded-md" />
+            </div>
+          </div>
+
+          {/* AI Message Skeleton */}
+          <div className="flex items-start gap-3">
+            <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-60 rounded-md" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Input Area Skeleton */}
+      <div className="p-2">
+        <div className="flex gap-2 rounded-2xl border bg-background p-2">
+          <Skeleton className="h-10 flex-1 rounded-md" />
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-24 rounded-md" />
+            <Skeleton className="h-10 w-10 rounded-md" />
+          </div>
+        </div>
       </div>
     </div>
   );
