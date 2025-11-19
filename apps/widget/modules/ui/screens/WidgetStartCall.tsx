@@ -2,7 +2,7 @@
 
 import { useVAPI } from "@/hooks/use-vapi";
 import {
-  conversationIdAtom,
+  conversationIdAtomFamily,
   contactSessionIdAtomFamily,
   organizationIdAtom,
   screenAtom,
@@ -11,13 +11,16 @@ import { api } from "@workspace/backend/convex/_generated/api";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Button } from "@workspace/ui/components/button";
 import { useQuery } from "convex/react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
+import { useEffect } from "react";
 
 export const WidgetStartCall = () => {
   const setScreen = useSetAtom(screenAtom);
-  const conversationId = useAtomValue(conversationIdAtom);
   const organizationId = useAtomValue(organizationIdAtom);
+  const [conversationId, setConversationId] = useAtom(
+    conversationIdAtomFamily(organizationId || "")
+  );
   const contactSessionId = useAtomValue(
     contactSessionIdAtomFamily(organizationId || "")
   );
@@ -33,6 +36,15 @@ export const WidgetStartCall = () => {
   );
 
   const { endCall, isConnected, isSpeaking, transcript } = useVAPI();
+
+  // Handle conversation not found - redirect to selection screen
+  useEffect(() => {
+    if (conversation === null && conversationId) {
+      console.log("[WidgetStartCall] Conversation not found, redirecting to selection");
+      setConversationId(null);
+      setScreen("selection");
+    }
+  }, [conversation, conversationId, setConversationId, setScreen]);
 
   const handleEndCall = () => {
     endCall();

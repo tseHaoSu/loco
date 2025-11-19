@@ -76,6 +76,15 @@ export const WidgetChat = () => {
       observerEnabled: true,
     });
 
+  // Handle conversation not found - redirect to selection screen
+  useEffect(() => {
+    if (conversation === null && conversationId) {
+      console.log("[WidgetChat] Conversation not found, redirecting to selection");
+      setConversationId(null);
+      setScreen("selection");
+    }
+  }, [conversation, conversationId, setConversationId, setScreen]);
+
   useEffect(() => {
     if (
       !hasScrolledToBottomRef.current &&

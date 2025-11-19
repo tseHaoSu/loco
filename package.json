@@ -6,7 +6,8 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "count": "npx cloc --exclude-dir=node_modules,.next,dist,.turbo,.convex,_generated --exclude-ext=json,lock ."
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
