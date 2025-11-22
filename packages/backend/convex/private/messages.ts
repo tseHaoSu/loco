@@ -7,7 +7,6 @@ import { saveMessage } from "@convex-dev/agent";
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
-
 export const enhanceResponse = action({
   args: {
     prompt: v.string(),
@@ -48,8 +47,6 @@ export const enhanceResponse = action({
   },
 });
 
-
-
 export const create = mutation({
   args: {
     prompt: v.string(),
@@ -78,6 +75,14 @@ export const create = mutation({
       throw new ConvexError({
         code: "NOT_FOUND",
         message: "Conversation not found.",
+      });
+    }
+
+
+    //if operator intervene change to escalated
+    if (conversation.status === "unresolved") {
+      await ctx.db.patch(args.conversationId, {
+        status: "escalated",
       });
     }
 

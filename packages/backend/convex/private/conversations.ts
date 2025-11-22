@@ -86,10 +86,7 @@ export const getOne = query({
       });
     }
 
-    return {
-      ...conversation,
-      contactSession,
-    };
+    return conversation;
   },
 });
 
@@ -176,42 +173,6 @@ export const getMany = query({
     return {
       ...conversations,
       page: filteredData,
-    };
-  },
-});
-
-export const getOneConversation = query({
-  args: {
-    conversationId: v.id("conversations"),
-    contactSessionId: v.id("contactSessions"),
-  },
-  handler: async (ctx, args) => {
-    const session = await ctx.db.get(args.contactSessionId);
-    if (!session || session.expiresAt < Date.now()) {
-      throw new ConvexError({
-        code: "UNAUTHORIZED",
-        message: "Contact session is invalid or has expired.",
-      });
-    }
-
-    const conversation = await ctx.db.get(args.conversationId);
-
-    if (!conversation) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Conversation not found.",
-      });
-    }
-    if (conversation.contactSessionId !== session._id) {
-      throw new ConvexError({
-        code: "UNAUTHORIZED",
-        message: "Conversation does not belong to the contact session.",
-      });
-    }
-    return {
-      _id: conversation._id,
-      status: conversation.status,
-      threadId: conversation.threadId,
     };
   },
 });
