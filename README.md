@@ -308,6 +308,3 @@ const results = await rag.search(ctx, {
 });
 ```
 
-## License
-
-[Your License Here]
