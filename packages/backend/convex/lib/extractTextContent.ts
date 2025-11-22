@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { StorageActionWriter } from "convex/server";
+import { assert } from "convex-helpers";
 
 export type ExtractTextContentArgs = {
   storageId: string;
@@ -44,21 +45,45 @@ const SUPPORTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
+async function extractImageText(url: string): Promise<string> {
+  // TODO: Implement image text extraction using AI
+  return "";
+}
+
+async function extractPdfText(url: string): Promise<string> {
+  // TODO: Implement PDF text extraction using AI
+  return "";
+}
+
+async function extractHtmlText(url: string): Promise<string> {
+  // TODO: Implement HTML to Markdown conversion using AI
+  return "";
+}
+
 export async function extractTextContent(
   ctx: { storage: StorageActionWriter },
   args: ExtractTextContentArgs
 ): Promise<string> {
-  const { storageId, filename, bytes, mimeType } = args;
+  const { storageId, mimeType } = args;
 
-  // Get the file blob from storage (replaces deprecated getUrl)
-  const blob = await ctx.storage.get(storageId);
-  if (!blob) {
-    throw new Error(`File not found in storage: ${storageId}`);
+  const url = await ctx.storage.getUrl(storageId);
+  assert(url, "Failed to get storage URL for text extraction.");
+
+  // Handle images
+  if (SUPPORTED_IMAGE_TYPES.some((type) => type === mimeType)) {
+    return extractImageText(url);
   }
 
-  // Use provided bytes or get from storage
-  const fileBytes = bytes ?? (await blob.arrayBuffer());
+  // Handle PDFs
+  if (mimeType === "application/pdf") {
+    return extractPdfText(url);
+  }
 
-  // TODO: Implement text extraction logic based on mimeType
-  return "";
+  // Handle HTML
+  if (mimeType === "text/html") {
+    return extractHtmlText(url);
+  }
+
+  // Unsupported file type
+  throw new Error(`Unsupported MIME type for text extraction: ${mimeType}`);
 }
