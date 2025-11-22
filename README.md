@@ -26,6 +26,7 @@ An AI-powered voice assistant designed to solve customer issues through natural 
 ### Backend & Data
 - **Convex 1.28+** - Backend-as-a-Service with real-time database, serverless functions, and file storage
 - **@convex-dev/agent 0.2+** - AI agent framework for conversation orchestration
+- **@convex-dev/rag 0.6+** - Retrieval-Augmented Generation (RAG) for semantic document search
 - **Zod 3.25+** - TypeScript-first schema validation with runtime type safety
 
 ### Authentication & Authorization
@@ -248,6 +249,64 @@ pnpm lint
 - Type-safe API layer with Zod validation
 - Shared component library for consistent UI
 - Monorepo architecture for code reusability
+- **RAG-powered document search and file uploads** (see below)
+
+## RAG System for Document Intelligence
+
+This application includes a **Retrieval-Augmented Generation (RAG)** system that enables AI agents to search and retrieve information from uploaded documents.
+
+### How It Works
+
+**File Upload Pipeline:**
+1. User uploads a file (PDF, image, HTML)
+2. File is stored in Convex storage
+3. AI extracts text content using vision/file APIs
+4. Text is converted to vector embeddings
+5. Embeddings are stored in the vector database
+6. AI agents can now search and reference the document
+
+### Supported File Types
+
+- **Images** (PNG, JPEG, GIF, WebP) - Uses GPT-4o-mini vision to transcribe or describe
+- **PDFs** - Extracts text and structure using GPT-4o
+- **HTML** - Converts to clean Markdown format
+
+### Key Features
+
+- **Semantic Search** - Find relevant documents by meaning, not just keywords
+- **Multi-tenant Isolation** - Each organization's documents are isolated by namespace
+- **Content Deduplication** - Uses content hashing to avoid storing duplicates
+- **Metadata Tracking** - Stores filename, category, uploader, and storage references
+- **AI-Powered Extraction** - Handles complex layouts, images with text, and various formats
+
+### Implementation Details
+
+**Technology:**
+- `@convex-dev/rag` - Vector database and embedding management
+- OpenAI `text-embedding-3-small` - Converts text to 1536-dimensional vectors
+- GPT-4o & GPT-4o-mini - Text extraction from files
+
+**Files:**
+- `packages/backend/convex/private/files.ts` - File upload/delete mutations
+- `packages/backend/convex/lib/extractTextContent.ts` - AI-powered text extraction
+- `packages/backend/convex/system/agent/rag.ts` - RAG configuration
+
+**Usage Example:**
+```typescript
+// Upload file
+const { entryId } = await addFile({
+  filename: "support-guide.pdf",
+  mimeType: "application/pdf",
+  bytes: fileBuffer,
+  category: "documentation"
+});
+
+// AI agents can now search across all uploaded documents
+const results = await rag.search(ctx, {
+  query: "How do I reset my password?",
+  limit: 5
+});
+```
 
 ## License
 

@@ -1,6 +1,6 @@
 # CLAUDE.md - AI Assistant Guide for Loco Codebase
 
-> **Last Updated:** 2025-11-17
+> **Last Updated:** 2025-11-23
 > **Purpose:** This document provides AI assistants with comprehensive context about the codebase structure, development workflows, and coding conventions to enable effective code assistance.
 
 ---
@@ -28,6 +28,7 @@ This is a **customer support/conversation management platform** built as a TypeS
 - Multi-organization support with Clerk authentication
 - Real-time conversation management using Convex
 - AI-powered support agents (@convex-dev/agent)
+- **RAG-powered document intelligence** (@convex-dev/rag) - File upload, text extraction, and semantic search
 - Contact session tracking with metadata
 - Conversation status management (unresolved, escalated, resolved)
 - Multiple deployment targets (web dashboard and embeddable widget)
@@ -64,11 +65,16 @@ loco/
 │   │   └── convex/
 │   │       ├── public/           # Public Convex functions
 │   │       ├── private/          # Private Convex functions (auth required)
+│   │       │   └── files.ts      # RAG file upload/delete mutations
 │   │       ├── system/           # System-level functions
 │   │       │   ├── agent/        # AI agent implementations
+│   │       │   │   └── rag.ts    # RAG configuration and initialization
 │   │       │   └── internal/     # Internal system functions
+│   │       ├── lib/              # Utility functions
+│   │       │   └── extractTextContent.ts  # AI-powered text extraction
 │   │       ├── schema.ts         # Database schema
-│   │       └── auth.config.ts    # Clerk authentication config
+│   │       ├── auth.config.ts    # Clerk authentication config
+│   │       └── convex.config.ts  # Convex app configuration (includes RAG)
 │   │
 │   ├── ui/                        # Shared UI component library
 │   │   └── src/
@@ -103,7 +109,9 @@ loco/
 ### Backend & Data
 - **Convex 1.28+** - Backend-as-a-Service (real-time database, functions, file storage)
 - **@convex-dev/agent 0.2+** - AI agent framework
+- **@convex-dev/rag 0.6+** - Retrieval-Augmented Generation with vector embeddings
 - **Zod 3.25+** - Schema validation
+- **convex-helpers** - Utility functions for Convex (assertions, validators)
 
 ### Authentication & Authorization
 - **Clerk** - User authentication and organization management
@@ -694,6 +702,67 @@ import { Agent } from "@convex-dev/agent";
 // Integrates with Convex for state management
 // Uses AI SDK for LLM interactions
 ```
+
+### RAG System Architecture
+
+**Overview:**
+The RAG (Retrieval-Augmented Generation) system enables semantic search over uploaded documents, allowing AI agents to find and reference relevant information when answering customer questions.
+
+**File Upload Pipeline:**
+```typescript
+User uploads file (PDF/Image/HTML)
+    ↓
+1. Store blob in Convex storage (ctx.storage.store)
+    ↓
+2. Extract text using AI (extractTextContent)
+    ├─ Images → GPT-4o-mini vision (transcribe/describe)
+    ├─ PDFs → GPT-4o (extract structured text)
+    └─ HTML → GPT-4o (convert to Markdown)
+    ↓
+3. Generate embeddings (OpenAI text-embedding-3-small)
+    ↓
+4. Store in vector DB (rag.add)
+    ├─ Text chunks
+    ├─ Vector embeddings (1536 dimensions)
+    └─ Metadata (filename, storageId, organizationId, category)
+    ↓
+5. AI agents can now search semantically
+```
+
+**Key Files:**
+- `packages/backend/convex/private/files.ts` - File upload/delete mutations
+- `packages/backend/convex/lib/extractTextContent.ts` - AI text extraction
+- `packages/backend/convex/system/agent/rag.ts` - RAG initialization
+
+**Multi-Tenancy:**
+- Files are isolated by `namespace` (set to `organizationId`)
+- Each organization can only search their own documents
+- Prevents cross-organization data leakage
+
+**Content Deduplication:**
+```typescript
+const { entryId, created } = await rag.add(ctx, {
+  namespace: organizationId,
+  text: extractedText,
+  contentHash: await contentHashFromArrayBuffer(bytes), // Deduplication
+  metadata: { storageId, filename, category }
+});
+
+if (!created) {
+  // File already exists, clean up duplicate storage
+  await ctx.storage.delete(storageId as Id<"_storage">);
+}
+```
+
+**Supported MIME Types:**
+- Images: `image/png`, `image/jpeg`, `image/jpg`, `image/gif`, `image/webp`
+- Documents: `application/pdf`
+- Web: `text/html`
+
+**AI Models Used:**
+- Embeddings: `text-embedding-3-small` (1536 dimensions)
+- Image extraction: `gpt-4o-mini` (cost-effective for vision tasks)
+- PDF/HTML extraction: `gpt-4o` (better structured output)
 
 ### State Management
 
