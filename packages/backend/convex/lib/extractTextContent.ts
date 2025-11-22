@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 import { StorageActionWriter } from "convex/server";
 import { assert } from "convex-helpers";
 
@@ -46,18 +47,75 @@ const SUPPORTED_IMAGE_TYPES = [
 ];
 
 async function extractImageText(url: string): Promise<string> {
-  // TODO: Implement image text extraction using AI
-  return "";
+  const result = await generateText({
+    model: AI_MODELS.image,
+    system: SYSTEM_PROMPTS.image,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Extract the text in markdown format without explaining that you will do so.",
+          },
+          {
+            type: "image",
+            image: url,
+          },
+        ],
+      },
+    ],
+  });
+
+  return result.text;
 }
 
 async function extractPdfText(url: string): Promise<string> {
-  // TODO: Implement PDF text extraction using AI
-  return "";
+  // Fetch PDF and convert to base64 (required for FilePart)
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  const base64 = Buffer.from(arrayBuffer).toString("base64");
+
+  const result = await generateText({
+    model: AI_MODELS.pdf,
+    system: SYSTEM_PROMPTS.pdf,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Extract the text in markdown format without explaining that you will do so.",
+          },
+          {
+            type: "file",
+            data: base64,
+            mediaType: "application/pdf",
+          },
+        ],
+      },
+    ],
+  });
+
+  return result.text;
 }
 
 async function extractHtmlText(url: string): Promise<string> {
-  // TODO: Implement HTML to Markdown conversion using AI
-  return "";
+  const response = await fetch(url);
+  const htmlContent = await response.text();
+
+  const result = await generateText({
+    model: AI_MODELS.html,
+    system: SYSTEM_PROMPTS.html,
+    messages: [
+      {
+        role: "user",
+        content: `Extract the text in markdown format without explaining that you will do so.\n\n${htmlContent}`,
+      },
+    ],
+  });
+
+  return result.text;
 }
 
 export async function extractTextContent(
@@ -84,6 +142,5 @@ export async function extractTextContent(
     return extractHtmlText(url);
   }
 
-  // Unsupported file type
   throw new Error(`Unsupported MIME type for text extraction: ${mimeType}`);
 }
