@@ -443,7 +443,29 @@ import { cn } from "@workspace/ui/lib/utils"
      - Browser APIs
      - Third-party libraries requiring client-side
 
-3. **Component Organization**
+3. **Prefer shadcn/ui Components**
+   - **ALWAYS use shadcn/ui components from `@workspace/ui` when available**
+   - Use pre-built components (Button, Input, Dialog, Form, etc.) instead of building from scratch
+   - Only create custom components when shadcn/ui doesn't provide the needed functionality
+   - Benefits: Consistent styling, accessibility, type safety, and maintainability
+
+   ```typescript
+   // ✅ CORRECT - Use shadcn/ui components
+   import { Button } from "@workspace/ui/components/button";
+   import { Input } from "@workspace/ui/components/input";
+   import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
+
+   <Button variant="outline" onClick={handleClick}>
+     Click me
+   </Button>
+
+   // ❌ AVOID - Creating custom button components
+   <button className="px-4 py-2 rounded border" onClick={handleClick}>
+     Click me
+   </button>
+   ```
+
+4. **Component Organization**
    ```typescript
    "use client";
 
@@ -1017,6 +1039,7 @@ For project-specific questions:
 
 | Date | Changes |
 |------|---------|
+| 2025-11-23 | Added React component guideline - prefer shadcn/ui components from `@workspace/ui` for consistency, accessibility, and maintainability |
 | 2025-11-17 | Added spacing utilities guideline - prefer `gap-*` over `space-*` utilities for flex/grid layouts with examples |
 | 2025-11-16 | Strengthened TypeScript conventions - made `any` type prohibition absolute with clear examples and moved to top priority in Common Pitfalls |
 | 2025-11-15 | Initial CLAUDE.md creation - comprehensive documentation of codebase structure, tech stack, development workflows, and conventions |

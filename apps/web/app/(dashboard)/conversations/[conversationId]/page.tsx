@@ -1,4 +1,4 @@
-import { ConversationView } from "@/modules/dashboard/ui/view/ConversationView";
+import { ConversationView } from "@/modules/dashboard/view/ConversationView";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import React from "react";
 

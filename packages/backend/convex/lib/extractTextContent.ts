@@ -74,7 +74,14 @@ async function extractPdfText(url: string): Promise<string> {
   // Fetch PDF and convert to base64 (required for FilePart)
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
-  const base64 = Buffer.from(arrayBuffer).toString("base64");
+
+  // Convert ArrayBuffer to base64 without Node.js Buffer
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  const base64 = btoa(binary);
 
   const result = await generateText({
     model: AI_MODELS.pdf,
@@ -140,6 +147,12 @@ export async function extractTextContent(
   // Handle HTML
   if (mimeType === "text/html") {
     return extractHtmlText(url);
+  }
+
+  // Handle plain text files (txt, csv, etc.)
+  if (mimeType === "text/plain" || mimeType === "text/csv") {
+    const response = await fetch(url);
+    return await response.text();
   }
 
   throw new Error(`Unsupported MIME type for text extraction: ${mimeType}`);
