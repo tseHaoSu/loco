@@ -33,7 +33,7 @@ export const WidgetView = ({ organizationId }: Props) => {
   return (
     <div className="flex flex-col min-h-svh bg-gradient-to-br from-background to-muted/20">
       <WidgetHeader organizationId={organizationId} />
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex flex-col">
         {screenComponents[screen]}
       </div>
       <WidgetFooter />

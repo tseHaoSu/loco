@@ -147,62 +147,64 @@ export const WidgetChat = () => {
         </div>
       </header>
 
-      {/* Messages */}
-      <AIConversation className="max-h-[calc(100vh-140px)]">
-        <AIConversationContent className="px-4 pb-4 pt-2">
-          <InfiniteScrollTrigger
-            ref={topElementRef}
-            canLoadMore={canLoadMore}
-            isLoadingMore={isLoadingMore}
-            onLoadMore={handleLoadMore}
-            loadMoreText="Load older messages"
-            noMoreText="No older messages"
-          />
+      {/* Messages - takes remaining space and scrolls internally */}
+      <div className="flex-1 overflow-hidden">
+        <AIConversation className="h-full">
+          <AIConversationContent className="px-4 pb-4 pt-2">
+            <InfiniteScrollTrigger
+              ref={topElementRef}
+              canLoadMore={canLoadMore}
+              isLoadingMore={isLoadingMore}
+              onLoadMore={handleLoadMore}
+              loadMoreText="Load older messages"
+              noMoreText="No older messages"
+            />
 
-          {messages.status === "LoadingFirstPage" ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                Loading messages...
-              </p>
-            </div>
-          ) : toUIMessages(messages.results ?? []).length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                No messages yet. Start the conversation!
-              </p>
-            </div>
-          ) : (
-            toUIMessages(messages.results ?? []).map((message) => {
-              const isUser = message.role === "user";
-              return (
-                <AIMessage
-                  key={message.key}
-                  from={isUser ? "user" : "assistant"}
-                >
-                  
-                  <AIMessageContent
-                    className={
-                      isUser
-                        ? "border-transparent bg-[#CC785C] text-white"
-                        : ""
-                    }
+            {messages.status === "LoadingFirstPage" ? (
+              <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Loading messages...
+                </p>
+              </div>
+            ) : toUIMessages(messages.results ?? []).length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No messages yet. Start the conversation!
+                </p>
+              </div>
+            ) : (
+              toUIMessages(messages.results ?? []).map((message) => {
+                const isUser = message.role === "user";
+                return (
+                  <AIMessage
+                    key={message.key}
+                    from={isUser ? "user" : "assistant"}
                   >
-                    {isUser ? (
-                      <p className="break-words text-sm">{message.text}</p>
-                    ) : (
-                      <AIResponse>{message.text}</AIResponse>
-                    )}
-                  </AIMessageContent>
-                </AIMessage>
-              );
-            })
-          )}
-        </AIConversationContent>
-        <AIConversationScrollButton />
-      </AIConversation>
 
-      {/* Input */}
-      <div className="shrink-0 bg-background p-4">
+                    <AIMessageContent
+                      className={
+                        isUser
+                          ? "border-transparent bg-[#CC785C] text-white"
+                          : ""
+                      }
+                    >
+                      {isUser ? (
+                        <p className="break-words text-sm">{message.text}</p>
+                      ) : (
+                        <AIResponse>{message.text}</AIResponse>
+                      )}
+                    </AIMessageContent>
+                  </AIMessage>
+                );
+              })
+            )}
+          </AIConversationContent>
+          <AIConversationScrollButton />
+        </AIConversation>
+      </div>
+
+      {/* Input - sticks to bottom */}
+      <div className="shrink-0 bg-background p-2">
         <AIInput onSubmit={handleSendMessage} className="rounded-2xl">
           <AIInputTextarea
             value={inputValue}
