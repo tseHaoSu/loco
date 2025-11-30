@@ -9,9 +9,12 @@
  */
 
 import type * as lib_extractTextContent from "../lib/extractTextContent.js";
+import type * as lib_secrets from "../lib/secrets.js";
 import type * as private_conversations from "../private/conversations.js";
 import type * as private_files from "../private/files.js";
 import type * as private_messages from "../private/messages.js";
+import type * as private_plugin from "../private/plugin.js";
+import type * as private_secrets from "../private/secrets.js";
 import type * as public_contactSessions from "../public/contactSessions.js";
 import type * as public_conversations from "../public/conversations.js";
 import type * as public_message from "../public/message.js";
@@ -19,9 +22,11 @@ import type * as public_organizations from "../public/organizations.js";
 import type * as public_users from "../public/users.js";
 import type * as system_agent_constant from "../system/agent/constant.js";
 import type * as system_agent_escalateConversation from "../system/agent/escalateConversation.js";
+import type * as system_agent_plugin from "../system/agent/plugin.js";
 import type * as system_agent_rag from "../system/agent/rag.js";
 import type * as system_agent_resolveConversationTool from "../system/agent/resolveConversationTool.js";
 import type * as system_agent_search from "../system/agent/search.js";
+import type * as system_agent_secrets from "../system/agent/secrets.js";
 import type * as system_agent_supportAgent from "../system/agent/supportAgent.js";
 import type * as system_internal_contactSessions from "../system/internal/contactSessions.js";
 import type * as system_internal_conversations from "../system/internal/conversations.js";
@@ -42,9 +47,12 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   "lib/extractTextContent": typeof lib_extractTextContent;
+  "lib/secrets": typeof lib_secrets;
   "private/conversations": typeof private_conversations;
   "private/files": typeof private_files;
   "private/messages": typeof private_messages;
+  "private/plugin": typeof private_plugin;
+  "private/secrets": typeof private_secrets;
   "public/contactSessions": typeof public_contactSessions;
   "public/conversations": typeof public_conversations;
   "public/message": typeof public_message;
@@ -52,9 +60,11 @@ declare const fullApi: ApiFromModules<{
   "public/users": typeof public_users;
   "system/agent/constant": typeof system_agent_constant;
   "system/agent/escalateConversation": typeof system_agent_escalateConversation;
+  "system/agent/plugin": typeof system_agent_plugin;
   "system/agent/rag": typeof system_agent_rag;
   "system/agent/resolveConversationTool": typeof system_agent_resolveConversationTool;
   "system/agent/search": typeof system_agent_search;
+  "system/agent/secrets": typeof system_agent_secrets;
   "system/agent/supportAgent": typeof system_agent_supportAgent;
   "system/internal/contactSessions": typeof system_internal_contactSessions;
   "system/internal/conversations": typeof system_internal_conversations;

@@ -1,6 +1,6 @@
 # CLAUDE.md - AI Assistant Guide for Loco Codebase
 
-> **Last Updated:** 2025-11-23
+> **Last Updated:** 2025-11-28
 > **Purpose:** This document provides AI assistants with comprehensive context about the codebase structure, development workflows, and coding conventions to enable effective code assistance.
 
 ---
@@ -71,7 +71,8 @@ loco/
 │   │       │   │   └── rag.ts    # RAG configuration and initialization
 │   │       │   └── internal/     # Internal system functions
 │   │       ├── lib/              # Utility functions
-│   │       │   └── extractTextContent.ts  # AI-powered text extraction
+│   │       │   ├── extractTextContent.ts  # AI-powered text extraction
+│   │       │   └── secrets.ts    # AWS Secrets Manager integration
 │   │       ├── schema.ts         # Database schema
 │   │       ├── auth.config.ts    # Clerk authentication config
 │   │       └── convex.config.ts  # Convex app configuration (includes RAG)
@@ -110,6 +111,7 @@ loco/
 - **Convex 1.28+** - Backend-as-a-Service (real-time database, functions, file storage)
 - **@convex-dev/agent 0.2+** - AI agent framework
 - **@convex-dev/rag 0.6+** - Retrieval-Augmented Generation with vector embeddings
+- **@aws-sdk/client-secrets-manager** - AWS Secrets Manager SDK for secure credential storage
 - **Zod 3.25+** - Schema validation
 - **convex-helpers** - Utility functions for Convex (assertions, validators)
 
@@ -786,6 +788,101 @@ if (!created) {
 - Image extraction: `gpt-4o-mini` (cost-effective for vision tasks)
 - PDF/HTML extraction: `gpt-4o` (better structured output)
 
+### Secrets Management with AWS
+
+**Overview:**
+The application uses AWS Secrets Manager for secure storage and retrieval of sensitive credentials and API keys. This provides centralized secret management with encryption at rest and in transit, audit logging, and automatic rotation capabilities.
+
+**Architecture:**
+```typescript
+Convex Action/Mutation
+    ↓
+1. createSecretsManagerClient()
+    ├─ Credentials from environment variables
+    │  ├─ AWS_REGION
+    │  ├─ AWS_ACCESS_KEY_ID
+    │  └─ AWS_SECRET_ACCESS_KEY
+    └─ Returns authenticated SecretsManagerClient
+    ↓
+2. getSecretValue(secretName) or upsertSecret(secretName, secretValue)
+    ├─ getSecretValue → Retrieves secret from AWS
+    └─ upsertSecret → Creates new or updates existing secret
+    ↓
+3. parseSecretValue<T>(secretValue)
+    ├─ Parses JSON string from AWS
+    ├─ Type-safe extraction with generics
+    └─ Returns typed object
+```
+
+**Key Functions (`packages/backend/convex/lib/secrets.ts`):**
+
+1. **createSecretsManagerClient()**
+   - Creates an authenticated AWS Secrets Manager client
+   - Uses environment variables for AWS credentials
+   - Required env vars: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+
+2. **getSecretValue(secretName: string)**
+   - Retrieves a secret value from AWS Secrets Manager
+   - Returns `GetSecretValueCommandOutput` containing the secret data
+   - Use with `parseSecretValue()` for type-safe extraction
+
+3. **upsertSecret(secretName: string, secretValue: Record<string, unknown>)**
+   - Creates a new secret or updates an existing one (upsert operation)
+   - Automatically handles `ResourceExistsException` to update existing secrets
+   - Stores secrets as JSON strings for structured data
+
+4. **parseSecretValue<T>(secretValue: GetSecretValueCommandOutput)**
+   - Parses the JSON secret string into a typed object
+   - Provides type safety with TypeScript generics
+   - Throws descriptive errors if secret is empty or invalid JSON
+
+**Usage Pattern:**
+```typescript
+import {
+  createSecretsManagerClient,
+  getSecretValue,
+  upsertSecret,
+  parseSecretValue
+} from "./lib/secrets";
+
+// Store a secret
+await upsertSecret("my-api-credentials", {
+  apiKey: "sk_live_...",
+  apiSecret: "secret_...",
+  endpoint: "https://api.example.com"
+});
+
+// Retrieve and parse a secret
+interface ApiCredentials {
+  apiKey: string;
+  apiSecret: string;
+  endpoint: string;
+}
+
+const secretValue = await getSecretValue("my-api-credentials");
+const credentials = parseSecretValue<ApiCredentials>(secretValue);
+
+// Use the credentials
+const response = await fetch(credentials.endpoint, {
+  headers: {
+    Authorization: `Bearer ${credentials.apiKey}`
+  }
+});
+```
+
+**Security Best Practices:**
+- Never commit AWS credentials to version control
+- Use IAM roles with least-privilege permissions
+- Rotate secrets regularly using AWS Secrets Manager rotation
+- Use different AWS accounts/secrets for dev/staging/production
+- All secrets are encrypted at rest using AWS KMS
+- Access to secrets is logged in AWS CloudTrail for audit
+
+**Multi-Tenancy Considerations:**
+- Secrets can be namespaced by organization (e.g., `org-{orgId}-api-key`)
+- Each organization's secrets should be isolated
+- Use organization-specific secret names to prevent cross-tenant access
+
 ### State Management
 
 **Web App:**
@@ -928,6 +1025,7 @@ npx convex env set CLERK_JWT_ISSUER_DOMAIN https://your-clerk-domain.clerk.accou
 | `apps/widget/modules/` | Feature modules (widget) |
 | `packages/backend/convex/public/` | Public API functions |
 | `packages/backend/convex/private/` | Authenticated API functions |
+| `packages/backend/convex/lib/` | Shared utilities (text extraction, secrets management) |
 | `packages/ui/src/components/` | Shared UI components |
 | `packages/ui/src/styles/` | Global styles |
 
@@ -952,6 +1050,9 @@ npx convex env set CLERK_JWT_ISSUER_DOMAIN https://your-clerk-domain.clerk.accou
 **Convex backend needs:**
 - `CLERK_JWT_ISSUER_DOMAIN` - Clerk JWT issuer (set via Convex dashboard)
 - `OPENAI_API_KEY` - OpenAI API key (for AI features)
+- `AWS_REGION` - AWS region for Secrets Manager (e.g., `us-east-1`)
+- `AWS_ACCESS_KEY_ID` - AWS access key for Secrets Manager
+- `AWS_SECRET_ACCESS_KEY` - AWS secret access key for Secrets Manager
 
 **Widget app additional:**
 - `NEXT_PUBLIC_VAPI_API_KEY` - Vapi voice API key (optional)
@@ -1039,6 +1140,7 @@ For project-specific questions:
 
 | Date | Changes |
 |------|---------|
+| 2025-11-28 | Added Secrets Management with AWS section - documented `secrets.ts` utility for AWS Secrets Manager integration, including architecture, key functions, usage patterns, security best practices, and multi-tenancy considerations |
 | 2025-11-23 | Added React component guideline - prefer shadcn/ui components from `@workspace/ui` for consistency, accessibility, and maintainability |
 | 2025-11-17 | Added spacing utilities guideline - prefer `gap-*` over `space-*` utilities for flex/grid layouts with examples |
 | 2025-11-16 | Strengthened TypeScript conventions - made `any` type prohibition absolute with clear examples and moved to top priority in Common Pitfalls |

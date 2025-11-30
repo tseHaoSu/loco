@@ -2,8 +2,16 @@ import { SignIn } from "@clerk/nextjs";
 
 const SignInView = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <SignIn afterSignInUrl="/conversations" />
+    <div className="flex min-h-screen items-center justify-center">
+      <SignIn
+        afterSignInUrl="/conversations"
+        signUpUrl="/sign-up"
+        appearance={{
+          elements: {
+            rootBox: "mx-auto",
+          },
+        }}
+      />
     </div>
   );
 };

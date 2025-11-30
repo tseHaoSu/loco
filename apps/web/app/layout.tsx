@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import "@workspace/ui/globals.css";
+import { Toaster } from "@workspace/ui/components/sonner";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -38,6 +39,7 @@ const RootLayout = ({
               backgroundImage: "url(/grain.jpg)",
             }}
           />
+          <Toaster />
           <Providers>{children}</Providers>
         </body>
       </html>

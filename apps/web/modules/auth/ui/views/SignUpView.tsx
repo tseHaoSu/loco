@@ -2,10 +2,16 @@ import { SignUp } from "@clerk/nextjs";
 
 const SignUpView = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       <SignUp
         afterSignUpUrl="/org-selection"
         afterSignInUrl="/conversations"
+        signInUrl="/sign-in"
+        appearance={{
+          elements: {
+            rootBox: "mx-auto",
+          },
+        }}
       />
     </div>
   );

@@ -2,10 +2,17 @@
 
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import AuthLayout from "../layouts/AuthLayout";
-import SignInView from "../views/SignInView";
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+
+  useEffect(() => {
+    // This will only run on the client side
+  }, []);
+
   return (
     <>
       <AuthLoading>
@@ -17,9 +24,25 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
       </AuthLoading>
       <Authenticated>{children}</Authenticated>
       <Unauthenticated>
-        <SignInView />
+        <UnauthenticatedRedirect />
       </Unauthenticated>
     </>
+  );
+};
+
+const UnauthenticatedRedirect = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/sign-in");
+  }, [router]);
+
+  return (
+    <AuthLayout>
+      <div className="flex h-full w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    </AuthLayout>
   );
 };
 

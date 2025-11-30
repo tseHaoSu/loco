@@ -24,6 +24,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.64",
     "@ai-sdk/react": "^2.0.90",
+    "@aws-sdk/client-secrets-manager": "^3.940.0",
     "@clerk/backend": "^2.20.0",
     "@convex-dev/agent": "^0.2.12",
     "@convex-dev/rag": "^0.6.1",

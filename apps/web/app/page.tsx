@@ -1,4 +1,4 @@
-import { LandingView } from "@/modules/landing/ui/views/LandingView";
+import { LandingView } from "@/modules/landing/LandingView";
 
 const Page = () => {
   return <LandingView />;
