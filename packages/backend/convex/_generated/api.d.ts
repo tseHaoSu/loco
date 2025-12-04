@@ -15,6 +15,7 @@ import type * as private_files from "../private/files.js";
 import type * as private_messages from "../private/messages.js";
 import type * as private_plugin from "../private/plugin.js";
 import type * as private_secrets from "../private/secrets.js";
+import type * as private_vapi from "../private/vapi.js";
 import type * as public_contactSessions from "../public/contactSessions.js";
 import type * as public_conversations from "../public/conversations.js";
 import type * as public_message from "../public/message.js";
@@ -30,6 +31,8 @@ import type * as system_agent_secrets from "../system/agent/secrets.js";
 import type * as system_agent_supportAgent from "../system/agent/supportAgent.js";
 import type * as system_internal_contactSessions from "../system/internal/contactSessions.js";
 import type * as system_internal_conversations from "../system/internal/conversations.js";
+import type * as system_internal_plugin from "../system/internal/plugin.js";
+import type * as system_internal_secrets from "../system/internal/secrets.js";
 
 import type {
   ApiFromModules,
@@ -53,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "private/messages": typeof private_messages;
   "private/plugin": typeof private_plugin;
   "private/secrets": typeof private_secrets;
+  "private/vapi": typeof private_vapi;
   "public/contactSessions": typeof public_contactSessions;
   "public/conversations": typeof public_conversations;
   "public/message": typeof public_message;
@@ -68,6 +72,8 @@ declare const fullApi: ApiFromModules<{
   "system/agent/supportAgent": typeof system_agent_supportAgent;
   "system/internal/contactSessions": typeof system_internal_contactSessions;
   "system/internal/conversations": typeof system_internal_conversations;
+  "system/internal/plugin": typeof system_internal_plugin;
+  "system/internal/secrets": typeof system_internal_secrets;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
