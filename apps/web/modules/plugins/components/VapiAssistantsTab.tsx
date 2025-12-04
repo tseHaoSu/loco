@@ -15,6 +15,52 @@ import {
 export const VapiAssistantsTab = () => {
   const { data: assistants, isLoading } = useVapiAssistants();
 
+  const renderTableContent = () => {
+    if (isLoading) {
+      return (
+        <TableRow>
+          <TableCell colSpan={3} className="text-center text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (!assistants || assistants.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={3} className="text-center text-muted-foreground">
+            No assistants configured
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return assistants.map((assistant) => (
+      <TableRow key={assistant.id} className="hover:bg-muted/50">
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Bot className="h-4 w-4 text-muted-foreground" />
+            {assistant.name || "-"}
+          </div>
+        </TableCell>
+        <TableCell className="font-mono">
+          {assistant.model?.model || "-"}
+        </TableCell>
+        <TableCell>
+          {assistant.id ? (
+            <Badge variant="default" className="gap-1">
+              <Check className="h-3 w-3" />
+              Active
+            </Badge>
+          ) : (
+            <Badge variant="destructive">Inactive</Badge>
+          )}
+        </TableCell>
+      </TableRow>
+    ));
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -24,59 +70,7 @@ export const VapiAssistantsTab = () => {
           <TableHead className="font-semibold">Status</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
-        {(() => {
-          if (isLoading) {
-            return (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="text-center text-muted-foreground"
-                >
-                  <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                </TableCell>
-              </TableRow>
-            );
-          }
-
-          if (!assistants || assistants.length === 0) {
-            return (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="text-center text-muted-foreground"
-                >
-                  No assistants configured
-                </TableCell>
-              </TableRow>
-            );
-          }
-
-          return assistants.map((assistant) => (
-            <TableRow key={assistant.id} className="hover:bg-muted/50">
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Bot className="h-4 w-4 text-muted-foreground" />
-                  {assistant.name || "-"}
-                </div>
-              </TableCell>
-              <TableCell className="font-mono">
-                {assistant.model?.model || "-"}
-              </TableCell>
-              <TableCell>
-                {assistant.id ? (
-                  <Badge variant="default" className="gap-1">
-                    <Check className="h-3 w-3" />
-                    Active
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive">Inactive</Badge>
-                )}
-              </TableCell>
-            </TableRow>
-          ));
-        })()}
-      </TableBody>
+      <TableBody>{renderTableContent()}</TableBody>
     </Table>
   );
 };

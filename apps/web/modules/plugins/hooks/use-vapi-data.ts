@@ -7,6 +7,9 @@ import type { FunctionReturnType } from "convex/server";
 type VapiPhoneNumbersResponse = FunctionReturnType<typeof api.private.vapi.getPhoneNumber>;
 type VapiAssistantsResponse = FunctionReturnType<typeof api.private.vapi.getAssistant>;
 
+const toError = (err: unknown, fallback: string) =>
+  err instanceof Error ? err : new Error(fallback);
+
 export const useVapiPhoneNumbers = (): {
   data: VapiPhoneNumbersResponse;
   isLoading: boolean;
@@ -19,39 +22,50 @@ export const useVapiPhoneNumbers = (): {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const result = await getPhoneNumbers({});
-        setData(result || ([] as VapiPhoneNumbersResponse));
+        if (!cancelled) {
+          setData(result || ([] as VapiPhoneNumbersResponse));
+        }
       } catch (err) {
-        const error =
-          err instanceof Error
-            ? err
-            : new Error("Failed to fetch phone numbers");
+        if (cancelled) return;
+        const error = toError(err, "Failed to fetch phone numbers");
         setError(error);
-        
+
         // Extract user-friendly error message
         let errorMessage = error.message;
         if (errorMessage.includes("secret data is incomplete")) {
-          errorMessage = "Vapi API keys are not properly configured. Please update your Vapi integration settings.";
+          errorMessage =
+            "Vapi API keys are not properly configured. Please update your Vapi integration settings.";
         } else if (errorMessage.includes("NOT_FOUND")) {
-          errorMessage = "Vapi plugin is not configured for this organization. Please set up your Vapi integration.";
+          errorMessage =
+            "Vapi plugin is not configured for this organization. Please set up your Vapi integration.";
         } else if (errorMessage.includes("UNAUTHORIZED")) {
-          errorMessage = "You don't have permission to access phone numbers. Please contact your administrator.";
+          errorMessage =
+            "You don't have permission to access phone numbers. Please contact your administrator.";
         }
-        
+
         toast.error("Failed to load phone numbers", {
           description: errorMessage,
           duration: 5000,
         });
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, [getPhoneNumbers]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return { data, isLoading, error };
 };
@@ -68,27 +82,35 @@ export const useVapiAssistants = (): {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const result = await getAssistants({});
-        setData(result || ([] as VapiAssistantsResponse));
+        if (!cancelled) {
+          setData(result || ([] as VapiAssistantsResponse));
+        }
       } catch (err) {
-        const error =
-          err instanceof Error
-            ? err
-            : new Error("Failed to fetch assistants");
+        if (cancelled) return;
+        const error = toError(err, "Failed to fetch assistants");
         setError(error);
         toast.error("Failed to load assistants", {
           description: error.message,
         });
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, [getAssistants]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return { data, isLoading, error };
 };
