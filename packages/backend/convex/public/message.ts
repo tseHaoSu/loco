@@ -64,7 +64,7 @@ export const create = action({
       );
 
       if (result.toolResults && result.toolResults.length > 0 && !result.text) {
-        const toolOutput = result.toolResults[0].output as string;
+        const toolOutput = result.toolResults[0]?.output as string;
 
         if (toolOutput && toolOutput.trim()) {
           await saveMessage(ctx, components.agent, {

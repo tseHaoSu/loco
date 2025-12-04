@@ -156,6 +156,11 @@ export const DashboardSidebar = () => {
                     asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
+                    className={
+                      isActive(item.url)
+                        ? "border-l-2 border-l-primary bg-orange-500/15 data-[active=true]:bg-orange-500/15 data-[active=true]:text-sidebar-foreground data-[active=true]:font-normal"
+                        : ""
+                    }
                   >
                     <Link href={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
@@ -177,6 +182,11 @@ export const DashboardSidebar = () => {
                     asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
+                    className={
+                      isActive(item.url)
+                        ? "border-l-2 border-l-primary bg-orange-500/15 data-[active=true]:bg-orange-500/15 data-[active=true]:text-sidebar-foreground data-[active=true]:font-normal"
+                        : ""
+                    }
                   >
                     <Link href={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
@@ -198,6 +208,11 @@ export const DashboardSidebar = () => {
                     asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
+                    className={
+                      isActive(item.url)
+                        ? "border-l-2 border-l-primary bg-orange-500/15 data-[active=true]:bg-orange-500/15 data-[active=true]:text-sidebar-foreground data-[active=true]:font-normal"
+                        : ""
+                    }
                   >
                     <Link href={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />

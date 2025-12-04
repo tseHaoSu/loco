@@ -3,56 +3,52 @@
 import React, { useState } from "react";
 import { Feature, PluginCard } from "../components/PluginCard";
 import { VapiPluginForm } from "../components/VapiPluginForm";
-import { Phone, MessageSquare, Clock, Zap, BarChart3, CheckCircle2 } from "lucide-react";
+import { VapiDisconnectForm } from "../components/VapiDisconnectForm";
+import { VapiConnectedView } from "./VapiConnectedView";
+import { Phone, MessageSquare, Clock, Zap, BarChart3 } from "lucide-react";
 import { api } from "@workspace/backend/convex/_generated/api";
-import { useQuery, useMutation } from "convex/react";
-import { Button } from "@workspace/ui/components/button";
+import { useQuery } from "convex/react";
 
 const vapiFeatures: Feature[] = [
   {
     icon: Phone,
     label: "AI Voice Calls",
-    description:
-      "Make and receive intelligent voice calls with natural-sounding AI assistants that understand context and intent.",
+    description: "Make and receive intelligent voice calls with AI assistants.",
   },
   {
     icon: MessageSquare,
     label: "Real-time Conversations",
-    description:
-      "Enable dynamic, real-time voice conversations with low latency and natural speech patterns for seamless interactions.",
+    description: "Enable dynamic voice conversations with low latency.",
   },
   {
     icon: Clock,
     label: "24/7 Availability",
-    description:
-      "Provide round-the-clock customer support with AI voice assistants that never sleep, ensuring constant availability.",
+    description: "Round-the-clock support with AI voice assistants.",
   },
   {
     icon: Zap,
     label: "Instant Integration",
-    description:
-      "Quickly integrate voice AI capabilities into your existing workflows with simple API calls and webhooks.",
+    description: "Integrate voice AI with simple API calls and webhooks.",
   },
   {
     icon: BarChart3,
     label: "Call Analytics",
-    description:
-      "Track and analyze call metrics, conversation quality, and customer interactions with comprehensive analytics dashboards.",
+    description: "Track call metrics and interactions with analytics.",
   },
 ];
 
 export const VapiView = () => {
   const vapiPlugin = useQuery(api.private.plugin.getOne, { service: "vapi" });
-  const removePlugin = useMutation(api.private.plugin.remove);
 
   const [connectOpen, setConnectOpen] = useState(false);
+  const [disconnectOpen, setDisconnectOpen] = useState(false);
 
   const handleSubmit = () => {
     setConnectOpen(true);
   };
 
-  const handleDisconnect = async () => {
-    await removePlugin({ service: "vapi" });
+  const handleDisconnect = () => {
+    setDisconnectOpen(true);
   };
 
   const isConnected = vapiPlugin !== null && vapiPlugin !== undefined;
@@ -68,26 +64,10 @@ export const VapiView = () => {
 
       <div className="mx-auto mt-8 w-full max-w-screen-md">
         {isConnected ? (
-          <div className="rounded-lg border bg-background p-8">
-            <div className="flex items-center justify-center gap-3">
-              <CheckCircle2 className="h-12 w-12 text-primary" />
-              <div>
-                <h2 className="text-2xl font-semibold text-primary">Connected to Vapi</h2>
-                <p className="text-sm text-muted-foreground">
-                  Your Vapi integration is active and ready to use.
-                </p>
-              </div>
-            </div>
-            <div className="mt-6 text-center">
-              <Button
-                variant="destructive"
-                onClick={handleDisconnect}
-                className="w-full"
-              >
-                Disconnect Vapi
-              </Button>
-            </div>
-          </div>
+          <>
+            <VapiConnectedView onDisconnect={handleDisconnect} />
+            <VapiDisconnectForm open={disconnectOpen} setOpen={setDisconnectOpen} />
+          </>
         ) : (
           <>
             <PluginCard

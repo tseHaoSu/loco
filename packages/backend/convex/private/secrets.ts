@@ -26,7 +26,7 @@ export const upsert = mutation({
     }
 
     //TODO check for subscription
-    await ctx.scheduler.runAfter(0, internal.system.agent.secrets.upsert, {
+    await ctx.scheduler.runAfter(0, internal.system.internal.secrets.upsert, {
       service: args.service,
       organizationId: organizationId,
       value: args.value,

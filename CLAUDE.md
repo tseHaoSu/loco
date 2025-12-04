@@ -177,6 +177,25 @@ pnpm lint
 pnpm format
 ```
 
+**Count lines of code:**
+```bash
+# Total lines of code
+find /Users/eastinsu/Desktop/PP/loco/apps /Users/eastinsu/Desktop/PP/loco/packages -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) ! -path "*/node_modules/*" ! -path "*/.next/*" ! -path "*/dist/*" ! -path "*/_generated/*" -exec wc -l {} + | tail -1
+
+# Detailed breakdown by package
+printf "=== LOCO CODEBASE STATISTICS ===\n\n" && \
+printf "Total Files:\n" && \
+find /Users/eastinsu/Desktop/PP/loco/apps /Users/eastinsu/Desktop/PP/loco/packages -type f \( -name "*.ts" -o -name "*.tsx" \) | grep -v node_modules | grep -v .next | grep -v _generated | wc -l && \
+printf "\nWeb App:\n" && \
+find /Users/eastinsu/Desktop/PP/loco/apps/web -type f -name "*.ts" -o -name "*.tsx" | grep -v node_modules | grep -v .next | xargs wc -l | tail -1 && \
+printf "\nWidget App:\n" && \
+find /Users/eastinsu/Desktop/PP/loco/apps/widget -type f -name "*.ts" -o -name "*.tsx" | grep -v node_modules | grep -v .next | xargs wc -l | tail -1 && \
+printf "\nBackend (Convex):\n" && \
+find /Users/eastinsu/Desktop/PP/loco/packages/backend/convex -type f -name "*.ts" | grep -v node_modules | grep -v _generated | xargs wc -l | tail -1 && \
+printf "\nUI Package:\n" && \
+find /Users/eastinsu/Desktop/PP/loco/packages/ui/src -type f -name "*.tsx" -o -name "*.ts" | xargs wc -l | tail -1
+```
+
 ### Workspace-Specific Commands
 
 **Run commands in specific workspace:**
@@ -1140,6 +1159,7 @@ For project-specific questions:
 
 | Date | Changes |
 |------|---------|
+| 2025-11-30 | Added code counting commands to Development Workflows section - provides quick ways to analyze codebase size and breakdown by package |
 | 2025-11-28 | Added Secrets Management with AWS section - documented `secrets.ts` utility for AWS Secrets Manager integration, including architecture, key functions, usage patterns, security best practices, and multi-tenancy considerations |
 | 2025-11-23 | Added React component guideline - prefer shadcn/ui components from `@workspace/ui` for consistency, accessibility, and maintainability |
 | 2025-11-17 | Added spacing utilities guideline - prefer `gap-*` over `space-*` utilities for flex/grid layouts with examples |
