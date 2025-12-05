@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "@workspace/backend/convex/_generated/api";
+import { Doc } from "@workspace/backend/convex/_generated/dataModel";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -55,18 +56,7 @@ const widgetSettingsSchema = z.object({
 type WidgetSettingsFormValues = z.infer<typeof widgetSettingsSchema>;
 
 interface CustomisationInputProps {
-  initialData: {
-    greetMessage: string;
-    defaultSuggestions: {
-      suggestion1: string;
-      suggestion2: string;
-      suggestion3: string;
-    };
-    vapiSettings: {
-      assistandId?: string;
-      phoneNumber?: string;
-    };
-  } | null;
+  initialData: Doc<"widgetSettings"> | null;
 }
 
 export const CustomisationInput = ({
@@ -100,7 +90,7 @@ export const CustomisationInput = ({
 
   const onClear = async () => {
     try {
-      await removeSettings({});
+      await removeSettings();
       form.reset({
         greetMessage: "",
         defaultSuggestions: {

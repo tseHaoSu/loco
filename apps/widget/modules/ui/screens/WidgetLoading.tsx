@@ -1,15 +1,15 @@
 import {
   errorMessageAtom,
-  loadingMessageAtom,
   organizationIdAtom,
   screenAtom,
   contactSessionIdAtomFamily,
   conversationIdAtomFamily,
+  widgetSettingsAtom,
 } from "@/store/widget-atoms";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Spinner } from "@workspace/ui/components/spinner";
-import { useAction, useMutation } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 
@@ -19,10 +19,13 @@ interface Props {
   organizationId?: string | null;
 }
 
+type NextScreen = "auth" | "chat" | "selection";
+
 export const WidgetLoading = ({ organizationId }: Props) => {
+  const setWidgetSettings = useSetAtom(widgetSettingsAtom);
   const [step, setStep] = useState<Init>("org");
+  const [nextScreen, setNextScreen] = useState<NextScreen | null>(null);
   const setErrorMessage = useSetAtom(errorMessageAtom);
-  const [loadingMessage, setLoadingMessage] = useAtom(loadingMessageAtom);
   const setScreen = useSetAtom(screenAtom);
   const setOrganizationId = useSetAtom(organizationIdAtom);
 
@@ -37,6 +40,12 @@ export const WidgetLoading = ({ organizationId }: Props) => {
 
   const validateOrganization = useAction(api.public.organizations.validate);
 
+  // Query widget settings
+  const widgetSettings = useQuery(
+    api.public.widgetSettings.getByOrganizationId,
+    organizationId ? { organizationId } : "skip"
+  );
+
   // 1. validate organization
   useEffect(() => {
     if (step !== "org") return;
@@ -46,8 +55,6 @@ export const WidgetLoading = ({ organizationId }: Props) => {
       setScreen("error");
       return;
     }
-
-    setLoadingMessage("Validating organization...");
 
     const validate = async () => {
       const result = await validateOrganization({ organizationId });
@@ -67,7 +74,6 @@ export const WidgetLoading = ({ organizationId }: Props) => {
     validateOrganization,
     setErrorMessage,
     setScreen,
-    setLoadingMessage,
     setOrganizationId,
     setStep,
   ]);
@@ -80,11 +86,9 @@ export const WidgetLoading = ({ organizationId }: Props) => {
   useEffect(() => {
     if (step !== "session") return;
 
-    setLoadingMessage("Checking session...");
-
     if (!contactSessionId) {
-      setStep("done");
-      setScreen("auth");
+      setNextScreen("auth");
+      setStep("settings");
       return;
     }
 
@@ -95,17 +99,17 @@ export const WidgetLoading = ({ organizationId }: Props) => {
         });
 
         if (result.valid) {
-          setStep("done");
-          setScreen(conversationId ? "chat" : "selection");
+          setNextScreen(conversationId ? "chat" : "selection");
+          setStep("settings");
         } else {
           setContactSessionId(null);
-          setStep("done");
-          setScreen("auth");
+          setNextScreen("auth");
+          setStep("settings");
         }
       } catch (error) {
         setContactSessionId(null);
-        setStep("done");
-        setScreen("auth");
+        setNextScreen("auth");
+        setStep("settings");
       }
     };
 
@@ -116,17 +120,24 @@ export const WidgetLoading = ({ organizationId }: Props) => {
     conversationId,
     validateContactSession,
     setContactSessionId,
-    setLoadingMessage,
-    setScreen,
     setStep,
   ]);
 
+  // 3. load widget settings
+  useEffect(() => {
+    if (step !== "settings") return;
+    if (widgetSettings !== undefined) {
+      setWidgetSettings(widgetSettings);
+      setStep("done");
+      if (nextScreen) {
+        setScreen(nextScreen);
+      }
+    }
+  }, [step, widgetSettings, nextScreen, setWidgetSettings, setStep, setScreen]);
+
   return (
-    <div className="flex flex-col items-center justify-center p-6">
+    <div className="flex flex-1 items-center justify-center p-6">
       <Spinner className="size-8" />
-      <p className="text-muted-foreground mt-4">
-        {loadingMessage || "Loading..."}
-      </p>
     </div>
   );
 };

@@ -30,13 +30,15 @@ export const WidgetView = ({ organizationId }: Props) => {
     chat: <WidgetChat />,
   };
 
+  const showFooter = screen !== "chat";
+
   return (
-    <div className="flex flex-col min-h-svh bg-gradient-to-br from-background to-muted/20">
+    <div className="flex h-svh flex-col overflow-hidden bg-gradient-to-br from-background to-muted/20">
       <WidgetHeader organizationId={organizationId} />
-      <div className="flex-1 flex flex-col">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {screenComponents[screen]}
       </div>
-      <WidgetFooter />
+      {showFooter && <WidgetFooter />}
     </div>
   );
 };
