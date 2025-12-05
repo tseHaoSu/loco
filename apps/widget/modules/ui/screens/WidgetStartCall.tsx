@@ -1,129 +1,160 @@
 "use client";
 
+import { useAtomValue, useSetAtom } from "jotai";
+import { ArrowLeft, Mic, MicOff, PhoneOff, Volume2 } from "lucide-react";
+
 import { useVAPI } from "@/hooks/use-vapi";
-import {
-  conversationIdAtomFamily,
-  contactSessionIdAtomFamily,
-  organizationIdAtom,
-  screenAtom,
-} from "@/store/widget-atoms";
-import { api } from "@workspace/backend/convex/_generated/api";
-import { Id } from "@workspace/backend/convex/_generated/dataModel";
+import { screenAtom, widgetSettingsAtom } from "@/store/widget-atoms";
 import { Button } from "@workspace/ui/components/button";
-import { useQuery } from "convex/react";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { Mic, MicOff, PhoneOff } from "lucide-react";
-import { useEffect } from "react";
+import { cn } from "@workspace/ui/lib/utils";
 
 export const WidgetStartCall = () => {
   const setScreen = useSetAtom(screenAtom);
-  const organizationId = useAtomValue(organizationIdAtom);
-  const [conversationId, setConversationId] = useAtom(
-    conversationIdAtomFamily(organizationId || "")
-  );
-  const contactSessionId = useAtomValue(
-    contactSessionIdAtomFamily(organizationId || "")
-  );
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
+  const assistantId = widgetSettings?.vapiSettings?.assistandId;
 
-  const conversation = useQuery(
-    api.public.conversations.getOneConversation,
-    conversationId && contactSessionId
-      ? {
-          conversationId: conversationId as Id<"conversations">,
-          contactSessionId: contactSessionId as Id<"contactSessions">,
-        }
-      : "skip"
-  );
+  const {
+    isSpeaking,
+    isConnected,
+    isConnecting,
+    transcript,
+    startCall,
+    endCall,
+  } = useVAPI({ assistantId });
 
-  const { endCall, isConnected, isSpeaking, transcript } = useVAPI();
-
-  // Handle conversation not found - redirect to selection screen
-  useEffect(() => {
-    if (conversation === null && conversationId) {
-      console.log("[WidgetStartCall] Conversation not found, redirecting to selection");
-      setConversationId(null);
-      setScreen("selection");
+  const handleBack = () => {
+    if (isConnected) {
+      endCall();
     }
-  }, [conversation, conversationId, setConversationId, setScreen]);
+    setScreen("selection");
+  };
 
   const handleEndCall = () => {
     endCall();
     setScreen("selection");
   };
 
+  const getStatusText = () => {
+    if (isConnecting) return "Connecting";
+    if (isConnected && isSpeaking) return "AI speaking";
+    if (isConnected) return "Connected";
+    return "Disconnected";
+  };
+
+  const getStatusColor = () => {
+    if (isConnecting) return "bg-yellow-500";
+    if (isConnected) return "bg-green-500";
+    return "bg-red-500";
+  };
+
   return (
-    <div className="px-4">
-      <div className="max-w-2xl mx-auto flex flex-col gap-6">
-        {/* Connection Status */}
-        <div className="flex items-center justify-center gap-2 py-2">
-          {isConnected ? (
-            <>
-              {isSpeaking ? (
-                <Mic className="h-5 w-5 text-blue-500 animate-pulse" />
-              ) : (
-                <MicOff className="h-5 w-5 text-muted-foreground" />
-              )}
-              <span className="text-sm">
-                {isSpeaking ? "Assistant is speaking..." : "Listening..."}
-              </span>
-            </>
-          ) : (
-            <span className="text-sm text-muted-foreground">
-              Connecting to call...
-            </span>
-          )}
-        </div>
-
-        {/* Transcript Container */}
-        <div className="rounded-lg border bg-card p-4 shadow-sm">
-          <div className="flex flex-col gap-3 max-h-96 overflow-y-auto">
-            {transcript.length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
-                <p className="text-sm text-muted-foreground">
-                  {isConnected
-                    ? "Connected! Start speaking to begin the conversation."
-                    : "Connecting to call..."}
-                </p>
-              </div>
-            ) : (
-              transcript.map((message, index) => (
-                <div
-                  key={index}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                  >
-                    <p className="text-sm font-medium mb-1">
-                      {message.role === "user" ? "You" : "Assistant"}
-                    </p>
-                    <p className="text-sm">{message.text}</p>
-                  </div>
-                </div>
-              ))
+    <div className="flex h-full flex-col bg-background">
+      {/* Header */}
+      <header className="flex shrink-0 items-center gap-3 border-b bg-background px-4 py-3">
+        <Button
+          onClick={handleBack}
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              "h-2 w-2 rounded-full",
+              getStatusColor(),
+              (isConnecting || (isConnected && isSpeaking)) && "animate-pulse"
             )}
-          </div>
+          />
+          <span className="text-sm font-medium">{getStatusText()}</span>
         </div>
+      </header>
 
-        {/* End Call Button */}
-        <div className="flex justify-center">
-          <Button
-            onClick={handleEndCall}
-            size="lg"
-            variant="destructive"
-            className="w-full max-w-xs"
-            disabled={!isConnected}
+      {/* Voice Indicator */}
+      <div className="flex shrink-0 items-center justify-center border-b bg-muted/30 py-6">
+        <div className="flex flex-col items-center gap-4">
+          {/* Animated Voice Circle */}
+          <div
+            className={cn(
+              "relative flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300",
+              isConnected ? "bg-primary/10" : "bg-muted"
+            )}
           >
-            <PhoneOff className="mr-2 h-5 w-5" />
-            End Call
-          </Button>
+            {/* Pulse rings when speaking */}
+            {isSpeaking && (
+              <>
+                <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
+                <div
+                  className="absolute inset-0 animate-ping rounded-full bg-primary/10"
+                  style={{ animationDelay: "0.2s" }}
+                />
+              </>
+            )}
+
+            {/* Center icon */}
+            <div
+              className={cn(
+                "z-10 flex h-16 w-16 items-center justify-center rounded-full transition-colors",
+                isConnected ? "bg-primary" : "bg-muted-foreground/20"
+              )}
+            >
+              {isConnected ? (
+                isSpeaking ? (
+                  <Volume2 className="h-8 w-8 text-primary-foreground" />
+                ) : (
+                  <Mic className="h-8 w-8 text-primary-foreground" />
+                )
+              ) : (
+                <MicOff className="h-8 w-8 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+
+          {/* Status message */}
+          <p className="text-sm text-muted-foreground">
+            {isConnecting
+              ? "Setting up voice connection..."
+              : isConnected
+                ? isSpeaking
+                  ? "AI is responding"
+                  : "Speak now - I'm listening"
+                : "Not connected"}
+          </p>
         </div>
+      </div>
+
+      {/* Transcript Area - Simplified for debugging */}
+      <div className="flex-1 overflow-auto p-4">
+        <p className="text-sm text-muted-foreground mb-2">
+          Transcript:
+        </p>
+        <pre className="text-xs bg-muted p-2 rounded overflow-auto">
+          {JSON.stringify(transcript, null, 2)}
+        </pre>
+      </div>
+
+      {/* Start/End Call Buttons */}
+      <div className="shrink-0 border-t bg-background p-4 flex gap-2">
+        <Button
+          onClick={startCall}
+          size="lg"
+          className="flex-1"
+          disabled={isConnected || isConnecting}
+        >
+          <Mic className="mr-2 h-5 w-5" />
+          Start Call
+        </Button>
+        <Button
+          onClick={handleEndCall}
+          variant="destructive"
+          size="lg"
+          className="flex-1"
+          disabled={!isConnected && !isConnecting}
+        >
+          <PhoneOff className="mr-2 h-5 w-5" />
+          End Call
+        </Button>
       </div>
     </div>
   );
