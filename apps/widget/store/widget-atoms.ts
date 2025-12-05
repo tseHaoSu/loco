@@ -3,7 +3,7 @@ import { atomFamily } from "jotai/utils";
 import { atomWithStorage } from "jotai/utils";
 import { WidgetScreen } from "./types";
 import { CONTACT_SESSION_STORAGE_KEY } from "./constants";
-import { Id } from "@workspace/backend/convex/_generated/dataModel.js";
+import { Id, Doc } from "@workspace/backend/convex/_generated/dataModel.js";
 
 export const screenAtom = atom<WidgetScreen>("loading");
 export const errorMessageAtom = atom<string | null>(
@@ -20,7 +20,6 @@ export const contactSessionIdAtomFamily = atomFamily((organizationId: string) =>
   )
 );
 
-// Conversation ID stored in localStorage, scoped by organization
 export const conversationIdAtomFamily = atomFamily((organizationId: string) =>
   atomWithStorage<Id<"conversations"> | null>(
     `widget_conversation_${organizationId}`,
@@ -28,5 +27,5 @@ export const conversationIdAtomFamily = atomFamily((organizationId: string) =>
   )
 );
 
-// Legacy atom for backward compatibility - can be removed after migration
 export const conversationIdAtom = atom<Id<"conversations"> | null>(null);
+export const widgetSettingsAtom = atom<Doc<"widgetSettings"> | null>(null);

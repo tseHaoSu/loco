@@ -22,6 +22,7 @@ import type * as public_conversations from "../public/conversations.js";
 import type * as public_message from "../public/message.js";
 import type * as public_organizations from "../public/organizations.js";
 import type * as public_users from "../public/users.js";
+import type * as public_widgetSettings from "../public/widgetSettings.js";
 import type * as system_agent_constant from "../system/agent/constant.js";
 import type * as system_agent_escalateConversation from "../system/agent/escalateConversation.js";
 import type * as system_agent_plugin from "../system/agent/plugin.js";
@@ -64,6 +65,7 @@ declare const fullApi: ApiFromModules<{
   "public/message": typeof public_message;
   "public/organizations": typeof public_organizations;
   "public/users": typeof public_users;
+  "public/widgetSettings": typeof public_widgetSettings;
   "system/agent/constant": typeof system_agent_constant;
   "system/agent/escalateConversation": typeof system_agent_escalateConversation;
   "system/agent/plugin": typeof system_agent_plugin;
