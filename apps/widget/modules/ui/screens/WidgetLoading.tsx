@@ -5,6 +5,7 @@ import {
   contactSessionIdAtomFamily,
   conversationIdAtomFamily,
   widgetSettingsAtom,
+  vapiSecretsAtom,
 } from "@/store/widget-atoms";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
@@ -23,6 +24,7 @@ type NextScreen = "auth" | "chat" | "selection";
 
 export const WidgetLoading = ({ organizationId }: Props) => {
   const setWidgetSettings = useSetAtom(widgetSettingsAtom);
+  const setVapiSecrets = useSetAtom(vapiSecretsAtom);
   const [step, setStep] = useState<Init>("org");
   const [nextScreen, setNextScreen] = useState<NextScreen | null>(null);
   const setErrorMessage = useSetAtom(errorMessageAtom);
@@ -39,6 +41,7 @@ export const WidgetLoading = ({ organizationId }: Props) => {
   );
 
   const validateOrganization = useAction(api.public.organizations.validate);
+  const getVapiSecrets = useAction(api.public.secrets.getVapiSecrets);
 
   // Query widget settings
   const widgetSettings = useQuery(
@@ -128,12 +131,33 @@ export const WidgetLoading = ({ organizationId }: Props) => {
     if (step !== "settings") return;
     if (widgetSettings !== undefined) {
       setWidgetSettings(widgetSettings);
-      setStep("done");
-      if (nextScreen) {
-        setScreen(nextScreen);
-      }
+      setStep("vapi");
     }
-  }, [step, widgetSettings, nextScreen, setWidgetSettings, setStep, setScreen]);
+  }, [step, widgetSettings, setWidgetSettings, setStep]);
+
+  // 4. load vapi secrets
+  useEffect(() => {
+    if (step !== "vapi") return;
+    if (!organizationId) return;
+
+    const loadVapiSecrets = async () => {
+      try {
+        const secrets = await getVapiSecrets({ organizationId });
+        if (secrets) {
+          setVapiSecrets({ publicApiKey: secrets.publicApiKey });
+        }
+      } catch (error) {
+        console.error("Failed to load vapi secrets:", error);
+      } finally {
+        setStep("done");
+        if (nextScreen) {
+          setScreen(nextScreen);
+        }
+      }
+    };
+
+    loadVapiSecrets();
+  }, [step, organizationId, getVapiSecrets, setVapiSecrets, nextScreen, setStep, setScreen]);
 
   return (
     <div className="flex flex-1 items-center justify-center p-6">

@@ -1,11 +1,11 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useMutation } from "convex/react";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Doc } from "@workspace/backend/convex/_generated/dataModel";
@@ -20,11 +20,10 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import {
@@ -55,13 +54,13 @@ const widgetSettingsSchema = z.object({
 
 type WidgetSettingsFormValues = z.infer<typeof widgetSettingsSchema>;
 
-interface CustomisationInputProps {
+interface CustomizationInputProps {
   initialData: Doc<"widgetSettings"> | null;
 }
 
-export const CustomisationInput = ({
+export const CustomizationInput = ({
   initialData,
-}: CustomisationInputProps) => {
+}: CustomizationInputProps) => {
   const upsertSettings = useMutation(api.private.widgetSettings.upsert);
   const removeSettings = useMutation(api.private.widgetSettings.remove);
   const { data: assistants, isLoading: assistantsLoading } =

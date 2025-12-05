@@ -7,10 +7,11 @@ import { screenAtom } from "@/store/widget-atoms";
 import { useAtomValue } from "jotai";
 import { WidgetAuth } from "../screens/WidgetAuth";
 import { WidgetChat } from "../screens/WidgetChat";
+import { WidgetContact } from "../screens/WidgetContact";
 import { WidgetError } from "../screens/WidgetError";
+import { WidgetInbox } from "../screens/WidgetInbox";
 import { WidgetSelection } from "../screens/WidgetSelection";
 import { WidgetStartCall } from "../screens/WidgetStartCall";
-import { WidgetInbox } from "../screens/WidgetInbox";
 
 interface Props {
   organizationId: string;
@@ -26,7 +27,7 @@ export const WidgetView = ({ organizationId }: Props) => {
     voice: <WidgetStartCall />,
     auth: <WidgetAuth organizationId={organizationId} />,
     inbox: <WidgetInbox />,
-    contact: <p>Contact Screen</p>,
+    contact: <WidgetContact />,
     chat: <WidgetChat />,
   };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Vapi from "@vapi-ai/web";
 
 interface TranscriptMessage {
@@ -6,68 +6,116 @@ interface TranscriptMessage {
   text: string;
 }
 
-export const useVAPI = () => {
-  const [vapi, setVapi] = useState<Vapi | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
-  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+interface UseVAPIProps {
+  assistantId?: string;
+}
+
+const API_KEY = "e7ba5216-a907-460a-8fe4-7be1f4a9353c";
+
+let vapiInstance: Vapi | null = null;
+
+const getVapiInstance = () => {
+  if (!vapiInstance) {
+    vapiInstance = new Vapi(API_KEY);
+  }
+  return vapiInstance;
+};
+
+export const useVAPI = ({ assistantId }: UseVAPIProps = {}) => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
 
   useEffect(() => {
-    const vapiInstance = new Vapi(process.env.VAPI_KEY || "");
-    setVapi(vapiInstance);
+    const vapi = getVapiInstance();
 
-    vapiInstance.on("call-start", () => {
+    const handleError = () => {
+      setIsConnecting(false);
+      setIsConnected(false);
+      setIsSpeaking(false);
+    };
+
+    const handleCallStart = () => {
       setIsConnected(true);
       setIsConnecting(false);
       setTranscript([]);
-    });
+    };
 
-    vapiInstance.on("call-end", () => {
+    const handleCallEnd = () => {
       setIsConnected(false);
       setIsConnecting(false);
       setIsSpeaking(false);
-      setTranscript([]);
-    });
+      // Note: transcript is preserved so user can see the conversation after call ends
+    };
 
-    vapiInstance.on("speech-start", () => {
+    const handleSpeechStart = () => {
       setIsSpeaking(true);
-    });
+    };
 
-    vapiInstance.on("speech-end", () => {
+    const handleSpeechEnd = () => {
       setIsSpeaking(false);
-    });
+    };
 
-    vapiInstance.on("message", (message) => {
+    const handleMessage = (message: {
+      type: string;
+      transcriptType?: string;
+      role?: string;
+      transcript?: string;
+    }) => {
+      console.log("[VAPI] Message received:", message.type, message);
       if (message.type === "transcript" && message.transcriptType === "final") {
+        console.log("[VAPI] Adding transcript:", message.transcript);
         setTranscript((prev) => [
           ...prev,
           {
             role: message.role === "user" ? "user" : "assistant",
-            text: message.transcript,
+            text: message.transcript || "",
           },
         ]);
       }
-    });
+    };
+
+    vapi.on("error", handleError);
+    vapi.on("call-start", handleCallStart);
+    vapi.on("call-end", handleCallEnd);
+    vapi.on("speech-start", handleSpeechStart);
+    vapi.on("speech-end", handleSpeechEnd);
+    vapi.on("message", handleMessage);
+
     return () => {
-      vapiInstance?.stop();
+      vapi.off("error", handleError);
+      vapi.off("call-start", handleCallStart);
+      vapi.off("call-end", handleCallEnd);
+      vapi.off("speech-start", handleSpeechStart);
+      vapi.off("speech-end", handleSpeechEnd);
+      vapi.off("message", handleMessage);
     };
   }, []);
 
-  const startCall = () => {
+  const startCall = useCallback(async () => {
+    if (!assistantId) return;
+
     setIsConnecting(true);
+    const vapi = getVapiInstance();
 
-    //testing
-    if (vapi) {
-      vapi.start("2155e65c-d162-4fd5-8c31-35ed0ca70d20");
+    try {
+      await vapi.start(assistantId, {
+        transcriber: {
+          provider: "deepgram",
+          model: "nova-2",
+          language: "en",
+        },
+      });
+    } catch {
+      setIsConnecting(false);
     }
-  };
+  }, [assistantId]);
 
-  const endCall = () => {
-    if (vapi) {
-      vapi.stop();
-    }
-  };
+  const endCall = useCallback(() => {
+    const vapi = getVapiInstance();
+    vapi.stop();
+  }, []);
 
   return {
     isSpeaking,

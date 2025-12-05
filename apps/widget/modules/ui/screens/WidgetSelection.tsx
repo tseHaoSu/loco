@@ -1,92 +1,18 @@
 "use client";
 
-import { useVAPI } from "@/hooks/use-vapi";
 import {
-  contactSessionIdAtomFamily,
-  conversationIdAtomFamily,
-  errorMessageAtom,
-  organizationIdAtom,
+  hasVapiSecretsAtom,
   screenAtom,
+  widgetSettingsAtom,
 } from "@/store/widget-atoms";
-import { api } from "@workspace/backend/convex/_generated/api";
-import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Button } from "@workspace/ui/components/button";
-import { useMutation } from "convex/react";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { MessageSquarePlus, Phone } from "lucide-react";
-import { useState } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { MessageSquarePlus, Mic, Phone } from "lucide-react";
 
 export const WidgetSelection = () => {
   const setScreen = useSetAtom(screenAtom);
-  const setError = useSetAtom(errorMessageAtom);
-  const [organizationId] = useAtom(organizationIdAtom);
-  const contactSessionId = useAtomValue(
-    contactSessionIdAtomFamily(organizationId || "")
-  );
-  const setConversationId = useSetAtom(
-    conversationIdAtomFamily(organizationId || "")
-  );
-
-  const [pending, setPending] = useState(false);
-  const createConversation = useMutation(api.public.conversations.create);
-  const { startCall } = useVAPI();
-
-  const handleNewConversation = async () => {
-    if (!organizationId) {
-      setError("Organization ID is missing.");
-      setScreen("error");
-      return;
-    }
-    if (!contactSessionId) {
-      setScreen("auth");
-      return;
-    }
-
-    setPending(true);
-    try {
-      const conversationId = await createConversation({
-        organizationId,
-        contactSessionId: contactSessionId as Id<"contactSessions">,
-      });
-      setConversationId(conversationId);
-      setScreen("chat");
-    } catch (error) {
-      setError("Failed to create conversation. Please try again.");
-      setScreen("error");
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const handleNewVoiceCall = async () => {
-    if (!organizationId) {
-      setError("Organization ID is missing.");
-      setScreen("error");
-      return;
-    }
-    if (!contactSessionId) {
-      setScreen("auth");
-      return;
-    }
-
-    setPending(true);
-    try {
-      // Start the call first to capture user gesture for mic permission
-      startCall();
-
-      const conversationId = await createConversation({
-        organizationId,
-        contactSessionId: contactSessionId as Id<"contactSessions">,
-      });
-      setConversationId(conversationId);
-      setScreen("voice");
-    } catch (error) {
-      setError("Failed to start voice call. Please try again.");
-      setScreen("error");
-    } finally {
-      setPending(false);
-    }
-  };
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
+  const hasVapiSecrets = useAtomValue(hasVapiSecretsAtom);
 
   return (
     <div className="px-4 pt-4">
@@ -101,24 +27,34 @@ export const WidgetSelection = () => {
             </div>
 
             <Button
-              onClick={handleNewConversation}
+              onClick={() => setScreen("chat")}
               size="lg"
               className="w-full max-w-xs"
-              disabled={pending}
             >
               <MessageSquarePlus className="mr-2 h-5 w-5" />
-              {pending ? "Creating..." : "New Conversation"}
+              New Conversation
             </Button>
 
-            <Button
-              onClick={handleNewVoiceCall}
-              size="lg"
-              className="w-full max-w-xs"
-              disabled={pending}
-            >
-              <Phone className="mr-2 h-5 w-5" />
-              {pending ? "Starting..." : "Start Voice Call"}
-            </Button>
+            {hasVapiSecrets && widgetSettings?.vapiSettings?.assistandId && (
+              <Button
+                onClick={() => setScreen("voice")}
+                size="lg"
+                className="w-full max-w-xs"
+              >
+                <Mic className="mr-2 h-5 w-5" />
+                Start Voice Call
+              </Button>
+            )}
+            {widgetSettings?.vapiSettings?.phoneNumber && (
+              <Button
+                onClick={() => setScreen("contact")}
+                size="lg"
+                className="w-full max-w-xs"
+              >
+                <Phone className="mr-2 h-5 w-5" />
+                Call us
+              </Button>
+            )}
           </div>
         </div>
       </div>

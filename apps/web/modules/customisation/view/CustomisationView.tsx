@@ -6,9 +6,9 @@ import { Loader2 } from "lucide-react";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Separator } from "@workspace/ui/components/separator";
 
-import { CustomisationInput } from "../components/CustomisationInput";
+import { CustomizationInput } from "../components/CustomizationInput";
 
-export const CustomisationView = () => {
+export const CustomizationView = () => {
   const widgetSettings = useQuery(api.private.widgetSettings.getOne);
 
   // Loading state
@@ -23,12 +23,12 @@ export const CustomisationView = () => {
   return (
     <div className="flex min-h-screen flex-col bg-muted p-8">
       <div className="mx-auto w-full max-w-screen-md">
-        <h1 className="mb-2 text-2xl font-bold">Customisation</h1>
+        <h1 className="mb-2 text-2xl font-bold">Customization</h1>
         <p className="mb-6 text-muted-foreground">
           Customize the appearance and behavior of your widget
         </p>
 
-        <CustomisationInput initialData={widgetSettings} />
+        <CustomizationInput initialData={widgetSettings} />
       </div>
     </div>
   );

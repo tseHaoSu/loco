@@ -1,0 +1,48 @@
+import { v } from "convex/values";
+import { action } from "../_generated/server";
+import { internal } from "../_generated/api";
+import { Doc } from "../_generated/dataModel";
+import { getSecretValue, parseSecretValue } from "../lib/secrets";
+
+export const getVapiSecrets = action({
+  args: {
+    organizationId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const plugin = await ctx.runQuery(
+      internal.system.internal.plugin.getByOrganizationIdAndService,
+      {
+        organizationId: args.organizationId,
+        service: "vapi",
+      }
+    );
+
+    if (!plugin) {
+      return null;
+    }
+
+    const secretName = plugin.secretName;
+    const secret = await getSecretValue(secretName);
+
+    const secretData = parseSecretValue<{
+      privateApiKey: string;
+      publicApiKey: string;
+    }>(secret);
+
+    if (!secretData) {
+      return null;
+    }
+
+    if (!secretData.privateApiKey) {
+      return null;
+    }
+
+    if (!secretData.publicApiKey) {
+      return null;
+    }
+    return {
+      privateApiKey: secretData.privateApiKey,
+      publicApiKey: secretData.publicApiKey,
+    };
+  },
+});

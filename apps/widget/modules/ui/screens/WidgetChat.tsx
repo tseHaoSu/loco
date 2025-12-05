@@ -1,6 +1,5 @@
 "use client";
 
-import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
 import {
   contactSessionIdAtomFamily,
   conversationIdAtomFamily,
@@ -8,28 +7,29 @@ import {
   screenAtom,
   widgetSettingsAtom,
 } from "@/store/widget-atoms";
+import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
 import { api } from "@workspace/backend/convex/_generated/api";
-import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
 import {
   AIConversation,
   AIConversationContent,
   AIConversationScrollButton,
 } from "@workspace/ui/components/ai/conversation";
-import {
-  AIMessage,
-  AIMessageContent,
-} from "@workspace/ui/components/ai/message";
+import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 import {
   AIInput,
   AIInputSubmit,
   AIInputTextarea,
   AIInputToolbar,
 } from "@workspace/ui/components/ai/input";
+import {
+  AIMessage,
+  AIMessageContent,
+} from "@workspace/ui/components/ai/message";
 import { AIResponse } from "@workspace/ui/components/ai/response";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
-import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 import { useAction, useQuery } from "convex/react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowLeft, ArrowUp } from "lucide-react";
