@@ -4,7 +4,7 @@ const SignInView = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <SignIn
-        afterSignInUrl="/conversations"
+        fallbackRedirectUrl="/org-selection"
         signUpUrl="/sign-up"
         appearance={{
           elements: {

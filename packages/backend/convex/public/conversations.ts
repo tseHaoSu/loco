@@ -60,8 +60,8 @@ export const getOneConversation = query({
     contactSessionId: v.id("contactSessions"),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db.get(args.contactSessionId);
-    if (!session || session.expiresAt < Date.now()) {
+    const contactSession = await ctx.db.get(args.contactSessionId);
+    if (!contactSession || contactSession.expiresAt < Date.now()) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
         message: "Contact session is invalid or has expired.",
@@ -74,11 +74,8 @@ export const getOneConversation = query({
       // Return null instead of throwing error to allow graceful handling in UI
       return null;
     }
-    if (conversation.contactSessionId !== session._id) {
-      throw new ConvexError({
-        code: "UNAUTHORIZED",
-        message: "Conversation does not belong to the contact session.",
-      });
+    if (conversation.contactSessionId !== contactSession._id) {
+      return null;
     }
     return {
       _id: conversation._id,
@@ -94,9 +91,9 @@ export const create = mutation({
     contactSessionId: v.id("contactSessions"),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db.get(args.contactSessionId);
+    const contactSession = await ctx.db.get(args.contactSessionId);
 
-    if (!session || session.expiresAt < Date.now()) {
+    if (!contactSession || contactSession.expiresAt < Date.now()) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
         message: "Contact session is invalid or has expired.",
