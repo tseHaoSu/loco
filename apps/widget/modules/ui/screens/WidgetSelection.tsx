@@ -1,5 +1,6 @@
 "use client";
 
+import { useVAPI } from "@/hooks/use-vapi";
 import {
   hasVapiSecretsAtom,
   screenAtom,
@@ -7,12 +8,25 @@ import {
 } from "@/store/widget-atoms";
 import { Button } from "@workspace/ui/components/button";
 import { useAtomValue, useSetAtom } from "jotai";
-import { MessageSquarePlus, Mic, Phone } from "lucide-react";
+import { MessageSquarePlus, Phone } from "lucide-react";
 
 export const WidgetSelection = () => {
   const setScreen = useSetAtom(screenAtom);
   const widgetSettings = useAtomValue(widgetSettingsAtom);
   const hasVapiSecrets = useAtomValue(hasVapiSecretsAtom);
+
+  const assistantId = widgetSettings?.vapiSettings?.assistandId;
+
+  const { startCall } = useVAPI();
+
+  const handleNewConversation = () => {
+    setScreen("chat");
+  };
+
+  const handleNewVoiceCall = () => {
+    startCall();
+    setScreen("voice");
+  };
 
   return (
     <div className="px-4 pt-4">
@@ -27,7 +41,7 @@ export const WidgetSelection = () => {
             </div>
 
             <Button
-              onClick={() => setScreen("chat")}
+              onClick={handleNewConversation}
               size="lg"
               className="w-full max-w-xs"
             >
@@ -35,24 +49,14 @@ export const WidgetSelection = () => {
               New Conversation
             </Button>
 
-            {hasVapiSecrets && widgetSettings?.vapiSettings?.assistandId && (
+            {hasVapiSecrets && assistantId && (
               <Button
-                onClick={() => setScreen("voice")}
-                size="lg"
-                className="w-full max-w-xs"
-              >
-                <Mic className="mr-2 h-5 w-5" />
-                Start Voice Call
-              </Button>
-            )}
-            {widgetSettings?.vapiSettings?.phoneNumber && (
-              <Button
-                onClick={() => setScreen("contact")}
+                onClick={handleNewVoiceCall}
                 size="lg"
                 className="w-full max-w-xs"
               >
                 <Phone className="mr-2 h-5 w-5" />
-                Call us
+                Start Voice Call
               </Button>
             )}
           </div>

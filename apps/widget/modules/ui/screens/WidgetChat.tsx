@@ -1,44 +1,41 @@
 "use client";
 
+import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
 import {
   contactSessionIdAtomFamily,
   conversationIdAtomFamily,
   organizationIdAtom,
   screenAtom,
-  widgetSettingsAtom,
 } from "@/store/widget-atoms";
-import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
 import { api } from "@workspace/backend/convex/_generated/api";
+import { Button } from "@workspace/ui/components/button";
 import {
   AIConversation,
   AIConversationContent,
   AIConversationScrollButton,
 } from "@workspace/ui/components/ai/conversation";
-import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
+import {
+  AIMessage,
+  AIMessageAvatar,
+  AIMessageContent,
+} from "@workspace/ui/components/ai/message";
 import {
   AIInput,
   AIInputSubmit,
   AIInputTextarea,
   AIInputToolbar,
 } from "@workspace/ui/components/ai/input";
-import {
-  AIMessage,
-  AIMessageContent,
-} from "@workspace/ui/components/ai/message";
 import { AIResponse } from "@workspace/ui/components/ai/response";
-import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
-import { Spinner } from "@workspace/ui/components/spinner";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
+import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 import { useAction, useQuery } from "convex/react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowLeft, ArrowUp } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export const WidgetChat = () => {
   const setScreen = useSetAtom(screenAtom);
   const organizationId = useAtomValue(organizationIdAtom);
-  const widgetSettings = useAtomValue(widgetSettingsAtom);
   const [conversationId, setConversationId] = useAtom(
     conversationIdAtomFamily(organizationId || "")
   );
@@ -124,32 +121,7 @@ export const WidgetChat = () => {
     setScreen("selection");
   };
 
-  const handleSuggestionClick = async (suggestion: string) => {
-    if (isSending || !conversation?.threadId || !contactSessionId) return;
-
-    setIsSending(true);
-
-    try {
-      await sendMessage({
-        prompt: suggestion,
-        threadId: conversation.threadId,
-        contactSessionId,
-      });
-    } catch (error) {
-      console.error("Failed to send suggestion:", error);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
   const isResolved = conversation?.status === "resolved";
-
-  const suggestions = useMemo(() => {
-    if (!widgetSettings?.defaultSuggestions) return [];
-    const { suggestion1, suggestion2, suggestion3 } =
-      widgetSettings.defaultSuggestions;
-    return [suggestion1, suggestion2, suggestion3].filter(Boolean);
-  }, [widgetSettings?.defaultSuggestions]);
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -189,8 +161,10 @@ export const WidgetChat = () => {
             />
 
             {messages.status === "LoadingFirstPage" ? (
-              <div className="flex flex-1 items-center justify-center">
-                <Spinner className="size-6" />
+              <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Loading messages...
+                </p>
               </div>
             ) : toUIMessages(messages.results ?? []).length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
@@ -206,6 +180,7 @@ export const WidgetChat = () => {
                     key={message.key}
                     from={isUser ? "user" : "assistant"}
                   >
+
                     <AIMessageContent
                       className={
                         isUser
@@ -228,22 +203,8 @@ export const WidgetChat = () => {
         </AIConversation>
       </div>
 
-      {/* Suggestions and Input - sticks to bottom */}
+      {/* Input - sticks to bottom */}
       <div className="shrink-0 bg-background p-2">
-        {suggestions.length > 0 && !isResolved && (
-          <div className="mb-2 flex flex-col items-end gap-2">
-            {suggestions.map((suggestion, idx) => (
-              <Badge
-                key={idx}
-                variant="outline"
-                className="cursor-pointer border-[#CC785C] px-3 py-1.5 text-xs transition-colors hover:bg-[#CC785C] hover:text-white"
-                onClick={() => !isSending && handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </Badge>
-            ))}
-          </div>
-        )}
         <AIInput onSubmit={handleSendMessage} className="rounded-2xl">
           <AIInputTextarea
             value={inputValue}

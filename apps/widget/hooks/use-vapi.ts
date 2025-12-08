@@ -1,36 +1,53 @@
 import { useEffect, useState, useCallback } from "react";
+import { useAtomValue } from "jotai";
 import Vapi from "@vapi-ai/web";
+import { vapiSecretsAtom, widgetSettingsAtom } from "@/store/widget-atoms";
 
 interface TranscriptMessage {
   role: "user" | "assistant";
   text: string;
 }
 
-interface UseVAPIProps {
-  assistantId?: string;
-}
+const vapiInstances = new Map<string, Vapi>();
 
-const API_KEY = "e7ba5216-a907-460a-8fe4-7be1f4a9353c";
-
-let vapiInstance: Vapi | null = null;
-
-const getVapiInstance = () => {
-  if (!vapiInstance) {
-    vapiInstance = new Vapi(API_KEY);
+const getVapiInstance = (publicApiKey: string) => {
+  if (!vapiInstances.has(publicApiKey)) {
+    vapiInstances.set(publicApiKey, new Vapi(publicApiKey));
   }
-  return vapiInstance;
+  return vapiInstances.get(publicApiKey)!;
 };
 
-export const useVAPI = ({ assistantId }: UseVAPIProps = {}) => {
+export const useVAPI = () => {
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
+  const vapiSecrets = useAtomValue(vapiSecretsAtom);
+
+  const assistantId = widgetSettings?.vapiSettings?.assistandId;
+  const publicApiKey = vapiSecrets?.publicApiKey;
+
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
 
   useEffect(() => {
-    const vapi = getVapiInstance();
+    if (!publicApiKey) return;
 
-    const handleError = () => {
+    const vapi = getVapiInstance(publicApiKey);
+
+    const handleError = (error: {
+      message?: string;
+      error?: { message?: string };
+    }) => {
+      const errorMessage = error?.message || error?.error?.message || "";
+      if (
+        errorMessage.includes("Meeting ended") ||
+        errorMessage.includes("ejection") ||
+        errorMessage.includes("Meeting has ended")
+      ) {
+        return;
+      }
+
+      console.error("[VAPI] Error:", error);
       setIsConnecting(false);
       setIsConnected(false);
       setIsSpeaking(false);
@@ -46,7 +63,6 @@ export const useVAPI = ({ assistantId }: UseVAPIProps = {}) => {
       setIsConnected(false);
       setIsConnecting(false);
       setIsSpeaking(false);
-      // Note: transcript is preserved so user can see the conversation after call ends
     };
 
     const handleSpeechStart = () => {
@@ -63,9 +79,7 @@ export const useVAPI = ({ assistantId }: UseVAPIProps = {}) => {
       role?: string;
       transcript?: string;
     }) => {
-      console.log("[VAPI] Message received:", message.type, message);
       if (message.type === "transcript" && message.transcriptType === "final") {
-        console.log("[VAPI] Adding transcript:", message.transcript);
         setTranscript((prev) => [
           ...prev,
           {
@@ -91,13 +105,13 @@ export const useVAPI = ({ assistantId }: UseVAPIProps = {}) => {
       vapi.off("speech-end", handleSpeechEnd);
       vapi.off("message", handleMessage);
     };
-  }, []);
+  }, [publicApiKey]);
 
   const startCall = useCallback(async () => {
-    if (!assistantId) return;
+    if (!assistantId || !publicApiKey) return;
 
     setIsConnecting(true);
-    const vapi = getVapiInstance();
+    const vapi = getVapiInstance(publicApiKey);
 
     try {
       await vapi.start(assistantId, {
@@ -110,12 +124,13 @@ export const useVAPI = ({ assistantId }: UseVAPIProps = {}) => {
     } catch {
       setIsConnecting(false);
     }
-  }, [assistantId]);
+  }, [assistantId, publicApiKey]);
 
   const endCall = useCallback(() => {
-    const vapi = getVapiInstance();
+    if (!publicApiKey) return;
+    const vapi = getVapiInstance(publicApiKey);
     vapi.stop();
-  }, []);
+  }, [publicApiKey]);
 
   return {
     isSpeaking,

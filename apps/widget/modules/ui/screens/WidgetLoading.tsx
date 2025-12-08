@@ -1,38 +1,32 @@
 import {
+  contactSessionIdAtomFamily,
+  conversationIdAtomFamily,
   errorMessageAtom,
   organizationIdAtom,
   screenAtom,
-  contactSessionIdAtomFamily,
-  conversationIdAtomFamily,
-  widgetSettingsAtom,
   vapiSecretsAtom,
+  widgetSettingsAtom,
 } from "@/store/widget-atoms";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { useAtom, useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
-
-type Init = "storage" | "org" | "session" | "settings" | "vapi" | "done";
+import { useEffect, useRef } from "react";
 
 interface Props {
   organizationId?: string | null;
 }
 
-type NextScreen = "auth" | "chat" | "selection";
-
 export const WidgetLoading = ({ organizationId }: Props) => {
-  const setWidgetSettings = useSetAtom(widgetSettingsAtom);
-  const setVapiSecrets = useSetAtom(vapiSecretsAtom);
-  const [step, setStep] = useState<Init>("org");
-  const [nextScreen, setNextScreen] = useState<NextScreen | null>(null);
+  const hasInitialized = useRef(false);
+
   const setErrorMessage = useSetAtom(errorMessageAtom);
   const setScreen = useSetAtom(screenAtom);
   const setOrganizationId = useSetAtom(organizationIdAtom);
+  const setVapiSecrets = useSetAtom(vapiSecretsAtom);
+  const setWidgetSettings = useSetAtom(widgetSettingsAtom);
 
-  // Get the contact session and conversation atoms
-  // Use empty string as fallback
   const [contactSessionId, setContactSessionId] = useAtom(
     contactSessionIdAtomFamily(organizationId || "")
   );
@@ -42,125 +36,90 @@ export const WidgetLoading = ({ organizationId }: Props) => {
 
   const validateOrganization = useAction(api.public.organizations.validate);
   const getVapiSecrets = useAction(api.public.secrets.getVapiSecrets);
+  const validateContactSession = useMutation(api.public.contactSessions.validate);
 
-  // Query widget settings
   const widgetSettings = useQuery(
     api.public.widgetSettings.getByOrganizationId,
     organizationId ? { organizationId } : "skip"
   );
 
-  // 1. validate organization
   useEffect(() => {
-    if (step !== "org") return;
+    if (hasInitialized.current) return;
+    if (widgetSettings === undefined) return;
 
-    if (!organizationId) {
-      setErrorMessage("Organization ID required");
-      setScreen("error");
-      return;
-    }
+    hasInitialized.current = true;
 
-    const validate = async () => {
-      const result = await validateOrganization({ organizationId });
-      if (!result.valid) {
-        setErrorMessage(result.reason || "Invalid organization");
+    const initialize = async () => {
+      // 1. Validate organization
+      if (!organizationId) {
+        setErrorMessage("Organization ID required");
         setScreen("error");
-      } else {
-        setOrganizationId(organizationId);
-        setStep("session");
+        return;
       }
+
+      const orgResult = await validateOrganization({ organizationId });
+      if (!orgResult.valid) {
+        setErrorMessage(orgResult.reason || "Invalid organization");
+        setScreen("error");
+        return;
+      }
+      setOrganizationId(organizationId);
+
+      // 2. Validate session (if exists)
+      let validSessionId = contactSessionId;
+      if (contactSessionId) {
+        try {
+          const sessionResult = await validateContactSession({
+            contactSessionId: contactSessionId as Id<"contactSessions">,
+          });
+          if (!sessionResult.valid) {
+            setContactSessionId(null);
+            validSessionId = null;
+          }
+        } catch {
+          setContactSessionId(null);
+          validSessionId = null;
+        }
+      }
+
+      // 3. Load widget settings
+      if (widgetSettings) {
+        setWidgetSettings(widgetSettings);
+      }
+
+      // 4. Load VAPI secrets
+      try {
+        const secrets = await getVapiSecrets({ organizationId });
+        if (secrets?.publicApiKey) {
+          setVapiSecrets({ publicApiKey: secrets.publicApiKey });
+        }
+      } catch {
+        // VAPI secrets are optional
+      }
+
+      // 5. Navigate to appropriate screen
+      setScreen(validSessionId ? (conversationId ? "chat" : "selection") : "auth");
     };
 
-    validate();
+    initialize();
   }, [
-    step,
     organizationId,
+    widgetSettings,
+    contactSessionId,
+    conversationId,
     validateOrganization,
+    validateContactSession,
+    getVapiSecrets,
     setErrorMessage,
     setScreen,
     setOrganizationId,
-    setStep,
-  ]);
-
-  // 2. validate session
-  const validateContactSession = useMutation(
-    api.public.contactSessions.validate
-  );
-
-  useEffect(() => {
-    if (step !== "session") return;
-
-    if (!contactSessionId) {
-      setNextScreen("auth");
-      setStep("settings");
-      return;
-    }
-
-    const validateSession = async () => {
-      try {
-        const result = await validateContactSession({
-          contactSessionId: contactSessionId as Id<"contactSessions">,
-        });
-
-        if (result.valid) {
-          setNextScreen(conversationId ? "chat" : "selection");
-          setStep("settings");
-        } else {
-          setContactSessionId(null);
-          setNextScreen("auth");
-          setStep("settings");
-        }
-      } catch (error) {
-        setContactSessionId(null);
-        setNextScreen("auth");
-        setStep("settings");
-      }
-    };
-
-    validateSession();
-  }, [
-    step,
-    contactSessionId,
-    conversationId,
-    validateContactSession,
     setContactSessionId,
-    setStep,
+    setWidgetSettings,
+    setVapiSecrets,
   ]);
-
-  // 3. load widget settings
-  useEffect(() => {
-    if (step !== "settings") return;
-    if (widgetSettings !== undefined) {
-      setWidgetSettings(widgetSettings);
-      setStep("vapi");
-    }
-  }, [step, widgetSettings, setWidgetSettings, setStep]);
-
-  // 4. load vapi secrets
-  useEffect(() => {
-    if (step !== "vapi") return;
-    if (!organizationId) return;
-
-    const loadVapiSecrets = async () => {
-      try {
-        const secrets = await getVapiSecrets({ organizationId });
-        if (secrets) {
-          setVapiSecrets({ publicApiKey: secrets.publicApiKey });
-        }
-      } catch (error) {
-        console.error("Failed to load vapi secrets:", error);
-      } finally {
-        setStep("done");
-        if (nextScreen) {
-          setScreen(nextScreen);
-        }
-      }
-    };
-
-    loadVapiSecrets();
-  }, [step, organizationId, getVapiSecrets, setVapiSecrets, nextScreen, setStep, setScreen]);
 
   return (
-    <div className="flex flex-1 items-center justify-center p-6">
+    <div className="flex flex-col items-center justify-center p-6">
       <Spinner className="size-8" />
     </div>
   );
