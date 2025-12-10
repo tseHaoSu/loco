@@ -241,14 +241,6 @@ export const ConversationPanel = () => {
           </Button>
         ))}
 
-        {status === "CanLoadMore" && (
-          <button
-            onClick={() => loadMore(10)}
-            className="rounded-lg border border-border bg-card px-2 py-2 text-sm transition-colors hover:bg-accent"
-          >
-            Load more
-          </button>
-        )}
       </div>
     </div>
   );

@@ -71,19 +71,13 @@ export const getOne = query({
     const conversation = await ctx.db.get(args.conversationId);
 
     if (!conversation || conversation.organizationId !== organizationId) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Conversation not found.",
-      });
+      return null;
     }
 
     const contactSession = await ctx.db.get(conversation.contactSessionId);
 
     if (!contactSession || contactSession.expiresAt < Date.now()) {
-      throw new ConvexError({
-        code: "UNAUTHORIZED",
-        message: "Contact session is invalid or has expired.",
-      });
+      return null;
     }
 
     return conversation;
@@ -174,6 +168,40 @@ export const getMany = query({
       ...conversations,
       page: filteredData,
     };
+  },
+});
+
+export const remove = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity || identity === null) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "User must be authenticated.",
+      });
+    }
+
+    const organizationId = identity.orgId as string;
+    if (!organizationId) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "User does not belong to an organization.",
+      });
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+
+    if (!conversation || conversation.organizationId !== organizationId) {
+      throw new ConvexError({
+        code: "NOT_FOUND",
+        message: "Conversation not found.",
+      });
+    }
+
+    await ctx.db.delete(args.conversationId);
   },
 });
 

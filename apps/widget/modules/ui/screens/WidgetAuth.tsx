@@ -60,9 +60,9 @@ export const WidgetAuth = ({ organizationId }: WidgetAuthProps) => {
         },
       });
 
-      // Save session ID to localStorage and navigate to selection
+      // Save session ID to localStorage and navigate to loading
       setContactSessionId(sessionId);
-      setScreen("selection");
+      setScreen("loading");
       form.reset();
     } catch (error) {
       console.error("Failed to create contact session:", error);

@@ -1,9 +1,17 @@
 "use client";
 
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
 import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ArrowUp, Loader2, MoreHorizontalIcon, Trash2, User, Wand2Icon } from "lucide-react";
+import { z } from "zod";
+
 import { api } from "@workspace/backend/convex/_generated/api";
-import { Id } from "@workspace/backend/convex/_generated/dataModel";
+import type { Id } from "@workspace/backend/convex/_generated/dataModel";
 import {
   AIConversation,
   AIConversationContent,
@@ -15,6 +23,7 @@ import {
   AIInputTextarea,
   AIInputToolbar,
 } from "@workspace/ui/components/ai/input";
+import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 import {
   AIMessage,
   AIMessageContent,
@@ -22,32 +31,39 @@ import {
 import { AIResponse } from "@workspace/ui/components/ai/response";
 import { Button } from "@workspace/ui/components/button";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import { Form, FormControl, FormField } from "@workspace/ui/components/form";
-import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
-import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { useAction, useMutation, useQuery } from "convex/react";
-import { ArrowUp, Loader2, MoreHorizontalIcon, Wand2Icon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
+
 import { ConversationStatus } from "../components/ConversationStatus";
-import { useState } from "react";
+import { useContactPanel } from "../context/ContactPanelContext";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
 });
 
-export const ConversationView = ({
-  conversationId,
-}: {
+interface ConversationViewProps {
   conversationId: Id<"conversations">;
-}) => {
+}
+
+export const ConversationView = ({ conversationId }: ConversationViewProps) => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { isContactPanelOpen, toggleContactPanel } = useContactPanel();
+  const router = useRouter();
 
-  const conversation = useQuery(api.private.conversations.getOne, {
-    conversationId,
-  });
+  const conversation = useQuery(
+    api.private.conversations.getOne,
+    isDeleting ? "skip" : { conversationId }
+  );
 
   const messages = useThreadMessages(
     api.private.messages.getMany,
@@ -105,6 +121,19 @@ export const ConversationView = ({
     api.private.conversations.updateStatus
   );
 
+  const deleteConversation = useMutation(api.private.conversations.remove);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteConversation({ conversationId });
+      router.push("/conversations");
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
+      setIsDeleting(false);
+    }
+  };
+
   const handleToggleStatus = async () => {
     if (!conversation) return;
 
@@ -134,17 +163,44 @@ export const ConversationView = ({
 
   return (
     <div className="flex h-full flex-col bg-muted">
-      <header className="flex items-center justify-between border-b bg-background p-2.5">
-        <Button size="sm" variant="ghost">
-          <MoreHorizontalIcon />
-        </Button>
-        {conversation && (
-          <ConversationStatus
-            onClick={handleToggleStatus}
-            status={conversation.status}
-            disabled={isUpdatingStatus}
-          />
-        )}
+      <header className="flex items-center justify-between border-b bg-background px-3 py-2.5">
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-8 w-8">
+                <MoreHorizontalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem
+                onClick={toggleContactPanel}
+                className="gap-2"
+              >
+                <User className="h-4 w-4" />
+                {isContactPanelOpen ? "Hide details" : "Show details"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="gap-2 text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isDeleting ? "Deleting..." : "Delete"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {conversation && (
+            <ConversationStatus
+              onClick={handleToggleStatus}
+              status={conversation.status}
+              disabled={isUpdatingStatus}
+            />
+          )}
+        </div>
       </header>
 
       <AIConversation className="max-h-[calc(100vh-53px)]">
@@ -227,16 +283,16 @@ export const ConversationView = ({
 export const ConversationLoadingSkeleton = () => {
   return (
     <div className="flex h-full flex-col bg-muted">
-      {/* Header Skeleton */}
-      <header className="flex items-center justify-between border-b bg-background p-2.5">
-        <Skeleton className="h-9 w-9 rounded-md" />
-        <Skeleton className="h-8 w-24 rounded-full" />
+      <header className="flex items-center justify-between border-b bg-background px-3 py-2">
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-24 rounded-full" />
+          <Skeleton className="hidden h-8 w-8 rounded-md lg:block" />
+        </div>
       </header>
 
-      {/* Messages Area Skeleton */}
       <div className="flex-1 overflow-hidden p-4">
         <div className="flex flex-col gap-6">
-          {/* AI Message Skeleton */}
           <div className="flex items-start gap-3">
             <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
             <div className="flex flex-col gap-2">
@@ -245,14 +301,12 @@ export const ConversationLoadingSkeleton = () => {
             </div>
           </div>
 
-          {/* User Message Skeleton */}
           <div className="flex items-start justify-end gap-3">
             <div className="flex flex-col gap-2">
               <Skeleton className="h-4 w-40 rounded-md" />
             </div>
           </div>
 
-          {/* AI Message Skeleton */}
           <div className="flex items-start gap-3">
             <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
             <div className="flex flex-col gap-2">
@@ -262,7 +316,6 @@ export const ConversationLoadingSkeleton = () => {
             </div>
           </div>
 
-          {/* User Message Skeleton */}
           <div className="flex items-start justify-end gap-3">
             <div className="flex flex-col gap-2">
               <Skeleton className="h-4 w-52 rounded-md" />
@@ -270,7 +323,6 @@ export const ConversationLoadingSkeleton = () => {
             </div>
           </div>
 
-          {/* AI Message Skeleton */}
           <div className="flex items-start gap-3">
             <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
             <div className="flex flex-col gap-2">
@@ -280,7 +332,6 @@ export const ConversationLoadingSkeleton = () => {
         </div>
       </div>
 
-      {/* Input Area Skeleton */}
       <div className="p-2">
         <div className="flex gap-2 rounded-2xl border bg-background p-2">
           <Skeleton className="h-10 flex-1 rounded-md" />

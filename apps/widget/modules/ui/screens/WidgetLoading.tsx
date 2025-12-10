@@ -11,16 +11,17 @@ import { api } from "@workspace/backend/convex/_generated/api";
 import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { useAction, useMutation, useQuery } from "convex/react";
-import { useAtom, useSetAtom } from "jotai";
-import { useEffect, useRef } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useState } from "react";
 
 interface Props {
   organizationId?: string | null;
 }
 
 export const WidgetLoading = ({ organizationId }: Props) => {
-  const hasInitialized = useRef(false);
+  const [isInitializing, setIsInitializing] = useState(false);
 
+  const screen = useAtomValue(screenAtom);
   const setErrorMessage = useSetAtom(errorMessageAtom);
   const setScreen = useSetAtom(screenAtom);
   const setOrganizationId = useSetAtom(organizationIdAtom);
@@ -44,19 +45,20 @@ export const WidgetLoading = ({ organizationId }: Props) => {
   );
 
   useEffect(() => {
-    if (hasInitialized.current) return;
+    // Skip if already navigated away or currently initializing
+    if (screen !== "loading" || isInitializing) return;
+
+    if (!organizationId) {
+      setErrorMessage("Organization ID required");
+      setScreen("error");
+      return;
+    }
+
     if (widgetSettings === undefined) return;
 
-    hasInitialized.current = true;
+    setIsInitializing(true);
 
     const initialize = async () => {
-      // 1. Validate organization
-      if (!organizationId) {
-        setErrorMessage("Organization ID required");
-        setScreen("error");
-        return;
-      }
-
       const orgResult = await validateOrganization({ organizationId });
       if (!orgResult.valid) {
         setErrorMessage(orgResult.reason || "Invalid organization");
@@ -103,6 +105,8 @@ export const WidgetLoading = ({ organizationId }: Props) => {
 
     initialize();
   }, [
+    screen,
+    isInitializing,
     organizationId,
     widgetSettings,
     contactSessionId,

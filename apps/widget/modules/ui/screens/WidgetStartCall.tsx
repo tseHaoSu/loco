@@ -136,7 +136,7 @@ export const WidgetStartCall = () => {
               ? "Connecting..."
               : isConnected
                 ? isSpeaking
-                  ? "AI is responding"
+                  ? "Agent Speaking"
                   : "Listening..."
                 : "Not connected"}
           </p>
