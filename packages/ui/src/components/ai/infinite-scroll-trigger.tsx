@@ -28,6 +28,11 @@ export const InfiniteScrollTrigger = ({
     text = noMoreText;
   }
 
+  // Hide completely when no text to show
+  if (!text) {
+    return <div ref={ref} />;
+  }
+
   return (
     <div className={cn("flex justify-center w-full py-4", className)} ref={ref}>
       <Button

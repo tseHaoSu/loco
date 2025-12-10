@@ -11,7 +11,6 @@ import { Button } from "@workspace/ui/components/button";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
   MessageSquare,
-  Clock,
   CheckCircle,
   AlertTriangle,
   Circle,
@@ -49,96 +48,87 @@ export const WidgetInbox = () => {
   };
 
   return (
-    <div className="flex flex-col h-full px-4 py-5">
-      <div className="max-w-2xl mx-auto w-full flex flex-col gap-4">
-        {!contactSessionId ? (
-          <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
-            <div className="rounded-full bg-muted/50 p-4">
-              <MessageSquare className="h-12 w-12 text-muted-foreground" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-muted-foreground">
-                No conversations yet
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Start a new conversation from the home screen
-              </p>
-            </div>
+    <div className="flex flex-col gap-3 px-4 py-3">
+      {!contactSessionId ? (
+        <div className="flex flex-col items-center justify-center gap-3 py-8">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+            <MessageSquare className="h-6 w-6 text-muted-foreground" />
           </div>
-        ) : status === "LoadingFirstPage" ? (
-          <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
-            <p className="text-sm text-muted-foreground">
-              Loading conversations...
+          <div className="flex flex-col items-center gap-1 text-center">
+            <p className="text-sm text-muted-foreground">No conversations yet</p>
+            <p className="text-xs text-muted-foreground">
+              Start a new conversation from the home screen
             </p>
           </div>
-        ) : conversations && conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
-            <div className="rounded-full bg-muted/50 p-4">
-              <MessageSquare className="h-12 w-12 text-muted-foreground" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-xs text-muted-foreground">
-                Start a new conversation from the home screen
-              </p>
-            </div>
+        </div>
+      ) : status === "LoadingFirstPage" ? (
+        <div className="flex items-center justify-center py-8">
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      ) : conversations && conversations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-3 py-8">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+            <MessageSquare className="h-6 w-6 text-muted-foreground" />
           </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {conversations.map((conversation: any) => (
-              <Button
-                key={conversation._id}
-                onClick={() => handleConversationClick(conversation._id)}
-                variant="outline"
-                className="w-full h-auto text-left p-4 justify-start hover:bg-orange-700 hover:text-white transition-colors"
-              >
-                <div className="flex items-start justify-between gap-3 w-full">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      {conversation.status === "resolved" ? (
-                        <>
-                          <CheckCircle className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm font-medium">Resolved</span>
-                        </>
-                      ) : conversation.status === "escalated" ? (
-                        <>
-                          <AlertTriangle className="h-4 w-4 text-orange-500" />
-                          <span className="text-sm font-medium">Escalated</span>
-                        </>
-                      ) : (
-                        <>
-                          <Circle className="h-4 w-4 text-green-500" />
-                          <span className="text-sm font-medium">Active</span>
-                        </>
-                      )}
-                    </div>
-                    {conversation.lastMessage && (
-                      <p className="text-sm text-muted-foreground truncate">
-                        {conversation.lastMessage.text || "No message preview"}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
+          <p className="text-xs text-muted-foreground">
+            Start a new conversation from the home screen
+          </p>
+        </div>
+      ) : (
+        <>
+          {conversations.map((conversation: any) => (
+            <Button
+              key={conversation._id}
+              onClick={() => handleConversationClick(conversation._id)}
+              variant="ghost"
+              size="sm"
+              className="h-auto justify-start gap-3 rounded-xl bg-muted/50 px-4 py-4 text-left transition-all hover:bg-muted"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                {conversation.status === "resolved" ? (
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                ) : conversation.status === "escalated" ? (
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
+                ) : (
+                  <Circle className="h-4 w-4 text-green-500" />
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {conversation.status === "resolved"
+                      ? "Resolved"
+                      : conversation.status === "escalated"
+                        ? "Escalated"
+                        : "Active"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(conversation._creationTime, {
                       addSuffix: true,
                     })}
-                  </div>
+                  </span>
                 </div>
-              </Button>
-            ))}
+                {conversation.lastMessage && (
+                  <p className="truncate text-xs text-muted-foreground">
+                    {conversation.lastMessage.text || "No message preview"}
+                  </p>
+                )}
+              </div>
+            </Button>
+          ))}
 
-            {status === "CanLoadMore" && (
-              <Button
-                onClick={() => loadMore(10)}
-                variant="outline"
-                className="w-full"
-              >
-                Load more
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
+          {status === "CanLoadMore" && (
+            <Button
+              onClick={() => loadMore(10)}
+              variant="ghost"
+              size="sm"
+              className="rounded-xl bg-muted/30 text-xs text-muted-foreground hover:bg-muted"
+            >
+              Load more
+            </Button>
+          )}
+        </>
+      )}
     </div>
   );
 };
