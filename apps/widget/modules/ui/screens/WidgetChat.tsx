@@ -187,7 +187,7 @@ export const WidgetChat = () => {
               isLoadingMore={isLoadingMore}
               onLoadMore={handleLoadMore}
               loadMoreText="Load older messages"
-              noMoreText="No older messages"
+              noMoreText=""
             />
 
             {messages.status === "LoadingFirstPage" ? (
@@ -254,26 +254,23 @@ export const WidgetChat = () => {
         </AIConversation>
       </div>
 
-      {/* Suggestions */}
-      {showSuggestions && (
-        <div className="shrink-0 bg-background px-3 py-2">
-          <div className="flex flex-col items-end gap-2">
+      {/* Input - sticks to bottom */}
+      <div className="shrink-0 bg-background p-2">
+        {/* Suggestions */}
+        {showSuggestions && (
+          <div className="mb-2 flex flex-col items-end gap-1.5">
             {suggestions.map((suggestion, index) => (
               <Badge
                 key={index}
                 variant="outline"
-                className="cursor-pointer px-3 py-1.5 text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
+                className="cursor-pointer border-transparent bg-muted px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                 onClick={() => handleSuggestionClick(suggestion)}
               >
                 {suggestion}
               </Badge>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* Input - sticks to bottom */}
-      <div className="shrink-0 bg-background p-2">
+        )}
         <AIInput onSubmit={handleSendMessage} className="rounded-2xl">
           <AIInputTextarea
             value={inputValue}

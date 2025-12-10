@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Loco Widget Embed Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { color: #333; }
+    p { color: #666; line-height: 1.6; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Loco Widget Embed Test</h1>
+  <p>If everything is working correctly, you should see a <strong>blue chat button</strong> in the bottom-right corner of the page.</p>
+
+  <h2>Test Actions:</h2>
+  <ul>
+    <li>Click the button to open the widget</li>
+    <li>Click again to close it</li>
+    <li>Hover over the button to see the scale animation</li>
+  </ul>
+
+  <h2>JavaScript API:</h2>
+  <p>Open the browser console and try:</p>
+  <ul>
+    <li><code>LocoWidget.show()</code> - Open the widget</li>
+    <li><code>LocoWidget.hide()</code> - Close the widget</li>
+    <li><code>LocoWidget.destroy()</code> - Remove the widget</li>
+  </ul>
+
+  <!-- Embed script  testing url: cd apps/embed && npx serve . -p 5500-->
+  <script
+    src="./dist/widget.js"
+    data-organization-id="org_35HhrJqRndqxCCKk8Ik0IPTw3cz"
+    data-position="bottom-right">
+  </script>
+</body>
+</html>

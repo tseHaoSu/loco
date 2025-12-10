@@ -69,50 +69,47 @@ export const WidgetSelection = () => {
   };
 
   return (
-    <div className="px-4 pt-4">
-      <div className="max-w-2xl mx-auto flex flex-col gap-6">
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
-          <div className="flex flex-col items-center gap-4">
-            <div className="text-center flex flex-col gap-2">
-              <h2 className="text-lg font-semibold">Start a Conversation</h2>
-              <p className="text-sm text-muted-foreground">
-                Create a new conversation to get help
-              </p>
-            </div>
-
-            <Button
-              onClick={handleNewConversation}
-              size="lg"
-              className="w-full max-w-xs"
-              disabled={isCreating}
-            >
-              <MessageSquarePlus className="mr-2 h-5 w-5" />
-              {isCreating ? "Creating..." : "New Conversation"}
-            </Button>
-
-            {hasVapiSecrets && assistantId && (
-              <Button
-                onClick={handleNewVoiceCall}
-                size="lg"
-                className="w-full max-w-xs"
-              >
-                <Phone className="mr-2 h-5 w-5" />
-                Start Voice Call
-              </Button>
-            )}
-
-            {phoneNumber && (
-              <Button
-                onClick={handleContact}
-                className="w-full max-w-xs"
-              >
-                <PhoneCall className="mr-2 h-5 w-5" />
-                Call Us
-              </Button>
-            )}
-          </div>
+    <div className="flex flex-col gap-3 px-4 py-3">
+      <Button
+        onClick={handleNewConversation}
+        variant="ghost"
+        size="sm"
+        className="justify-start gap-3 rounded-xl bg-muted/50 px-4 py-6 text-sm font-medium transition-all hover:bg-muted"
+        disabled={isCreating}
+      >
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+          <MessageSquarePlus className="h-4 w-4 text-primary" />
         </div>
-      </div>
+        {isCreating ? "Creating..." : "New Conversation"}
+      </Button>
+
+      {hasVapiSecrets && assistantId && (
+        <Button
+          onClick={handleNewVoiceCall}
+          variant="ghost"
+          size="sm"
+          className="justify-start gap-3 rounded-xl bg-muted/50 px-4 py-6 text-sm font-medium transition-all hover:bg-muted"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+            <Phone className="h-4 w-4 text-primary" />
+          </div>
+          Start Voice Call
+        </Button>
+      )}
+
+      {phoneNumber && (
+        <Button
+          onClick={handleContact}
+          variant="ghost"
+          size="sm"
+          className="justify-start gap-3 rounded-xl bg-muted/50 px-4 py-6 text-sm font-medium transition-all hover:bg-muted"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+            <PhoneCall className="h-4 w-4 text-primary" />
+          </div>
+          Call Us
+        </Button>
+      )}
     </div>
   );
 };

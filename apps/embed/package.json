@@ -1,0 +1,21 @@
+{
+    "name": "embed",
+    "version": "1.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "build": "vite build && cp dist/widget.js ../web/public/widget.js",
+        "build:only": "vite build",
+        "dev": "vite build --watch",
+        "lint": "eslint .",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@types/node": "^22.15.29",
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "eslint": "^9.32.0",
+        "typescript": "^5.7.3",
+        "vite": "^6.3.5"
+    }
+}

@@ -1,4 +1,3 @@
-import React from "react";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface WidgetHeaderProps {
@@ -13,14 +12,14 @@ export const WidgetHeader = ({
   return (
     <header
       className={cn(
-        "relative border-b border-white/10 bg-gradient-to-br from-background/80 via-muted/10 to-accent/5 p-4 shadow-lg backdrop-blur-md",
+        "relative border-b bg-muted/30 px-4 py-4",
         className
       )}
     >
-      <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-2xl font-bold">Voice Assistant</h1>
-        <p className="text-sm text-muted-foreground">
-          Click the button below to start a conversation
+      <div className="flex flex-col items-center text-center">
+        <h1 className="text-base font-semibold">Loco Assistant</h1>
+        <p className="text-xs text-muted-foreground">
+          AI-powered support
         </p>
       </div>
     </header>

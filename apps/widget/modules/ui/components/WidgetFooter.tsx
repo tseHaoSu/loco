@@ -21,32 +21,30 @@ export const WidgetFooter = () => {
   const isInboxActive = screen === "inbox";
 
   return (
-    <div className="flex items-center justify-center gap-2 border-t bg-background p-4">
+    <div className="flex items-center justify-around border-t bg-background px-4 py-3">
       <Button
         variant="ghost"
-        className="flex-1 hover:bg-orange-700 hover:text-white transition-colors"
+        size="sm"
+        className={cn(
+          "flex flex-col gap-1 h-auto py-2 px-4 transition-all hover:bg-muted",
+          isHomeActive && "text-primary"
+        )}
         onClick={handleHomeClick}
       >
-        <Home
-          className={cn(
-            "mr-2 h-4 w-4",
-            isHomeActive ? "text-primary" : "text-muted-foreground"
-          )}
-        />
-        Home
+        <Home className="h-5 w-5" />
+        <span className="text-xs font-medium">Home</span>
       </Button>
       <Button
         variant="ghost"
-        className="flex-1 hover:bg-orange-700 hover:text-white transition-colors"
+        size="sm"
+        className={cn(
+          "flex flex-col gap-1 h-auto py-2 px-4 transition-all hover:bg-muted",
+          isInboxActive && "text-primary"
+        )}
         onClick={handleInboxClick}
       >
-        <Inbox
-          className={cn(
-            "mr-2 h-4 w-4",
-            isInboxActive ? "text-primary" : "text-muted-foreground"
-          )}
-        />
-        Inbox
+        <Inbox className="h-5 w-5" />
+        <span className="text-xs font-medium">Inbox</span>
       </Button>
     </div>
   );

@@ -188,15 +188,17 @@ export const WidgetStartCall = () => {
         </AIConversation>
       </div>
 
-      <div className="shrink-0 border-t bg-background p-3">
+      <div className="shrink-0 bg-background p-3">
         <Button
           onClick={handleEndCall}
-          variant="destructive"
+          variant="ghost"
           size="sm"
-          className="w-full"
+          className="w-full justify-center gap-3 rounded-xl bg-destructive/10 px-4 py-5 text-sm font-medium text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
           disabled={!isConnected && !isConnecting}
         >
-          <PhoneOff className="mr-1.5 h-4 w-4" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-destructive/20">
+            <PhoneOff className="h-4 w-4" />
+          </div>
           End Call
         </Button>
       </div>
