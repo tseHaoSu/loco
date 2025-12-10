@@ -36,9 +36,19 @@ export const useVAPI = () => {
 
     const handleError = (error: {
       message?: string;
-      error?: { message?: string };
+      errorMsg?: string;
+      error?: { message?: string; msg?: string; type?: string; statusCode?: number };
+      statusCode?: number;
     }) => {
-      const errorMessage = error?.message || error?.error?.message || "";
+      const errorMessage =
+        error?.message ||
+        error?.errorMsg ||
+        error?.error?.message ||
+        error?.error?.msg ||
+        error?.error?.type ||
+        "";
+
+      // Ignore expected "meeting ended" messages
       if (
         errorMessage.includes("Meeting ended") ||
         errorMessage.includes("ejection") ||
@@ -47,7 +57,18 @@ export const useVAPI = () => {
         return;
       }
 
-      console.error("[VAPI] Error:", error);
+      // Check for common VAPI configuration errors
+      const statusCode = error?.statusCode || error?.error?.statusCode;
+      if (statusCode === 401 || statusCode === 403) {
+        console.error("[VAPI] Authentication error: Invalid API key or assistant ID");
+      } else if (statusCode === 404) {
+        console.error("[VAPI] Not found: Assistant ID may be invalid");
+      } else if (Object.keys(error || {}).length === 0) {
+        console.error("[VAPI] Connection error: Check your VAPI credentials (publicApiKey and assistantId)");
+      } else {
+        console.error("[VAPI] Error:", JSON.stringify(error, null, 2));
+      }
+
       setIsConnecting(false);
       setIsConnected(false);
       setIsSpeaking(false);
@@ -108,7 +129,14 @@ export const useVAPI = () => {
   }, [publicApiKey]);
 
   const startCall = useCallback(async () => {
-    if (!assistantId || !publicApiKey) return;
+    if (!assistantId) {
+      console.error("[VAPI] Cannot start call: Missing assistantId in widget settings");
+      return;
+    }
+    if (!publicApiKey) {
+      console.error("[VAPI] Cannot start call: Missing publicApiKey in VAPI secrets");
+      return;
+    }
 
     setIsConnecting(true);
     const vapi = getVapiInstance(publicApiKey);
@@ -121,7 +149,8 @@ export const useVAPI = () => {
           language: "en",
         },
       });
-    } catch {
+    } catch (error) {
+      console.error("[VAPI] Failed to start call:", error);
       setIsConnecting(false);
     }
   }, [assistantId, publicApiKey]);

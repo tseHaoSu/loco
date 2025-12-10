@@ -6,8 +6,10 @@ import {
   conversationIdAtomFamily,
   organizationIdAtom,
   screenAtom,
+  widgetSettingsAtom,
 } from "@/store/widget-atoms";
 import { api } from "@workspace/backend/convex/_generated/api";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
   AIConversation,
@@ -42,6 +44,7 @@ export const WidgetChat = () => {
   const contactSessionId = useAtomValue(
     contactSessionIdAtomFamily(organizationId || "")
   );
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
 
@@ -121,7 +124,34 @@ export const WidgetChat = () => {
     setScreen("selection");
   };
 
+  const handleSuggestionClick = async (suggestion: string) => {
+    if (isSending || !conversation?.threadId || !contactSessionId || isResolved) return;
+
+    setIsSending(true);
+    try {
+      await sendMessage({
+        prompt: suggestion,
+        threadId: conversation.threadId,
+        contactSessionId,
+      });
+    } catch (error) {
+      console.error("Failed to send suggestion:", error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const isResolved = conversation?.status === "resolved";
+
+  const suggestions = widgetSettings?.defaultSuggestions
+    ? [
+        widgetSettings.defaultSuggestions.suggestion1,
+        widgetSettings.defaultSuggestions.suggestion2,
+        widgetSettings.defaultSuggestions.suggestion3,
+      ].filter(Boolean)
+    : [];
+
+  const showSuggestions = suggestions.length > 0 && !isResolved;
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -173,35 +203,74 @@ export const WidgetChat = () => {
                 </p>
               </div>
             ) : (
-              toUIMessages(messages.results ?? []).map((message) => {
-                const isUser = message.role === "user";
-                return (
-                  <AIMessage
-                    key={message.key}
-                    from={isUser ? "user" : "assistant"}
-                  >
-
-                    <AIMessageContent
-                      className={
-                        isUser
-                          ? "border-transparent bg-[#CC785C] text-white"
-                          : ""
-                      }
+              <>
+                {toUIMessages(messages.results ?? []).map((message) => {
+                  const isUser = message.role === "user";
+                  return (
+                    <AIMessage
+                      key={message.key}
+                      from={isUser ? "user" : "assistant"}
                     >
-                      {isUser ? (
-                        <p className="break-words text-sm">{message.text}</p>
-                      ) : (
-                        <AIResponse>{message.text}</AIResponse>
-                      )}
+                      <AIMessageContent
+                        className={
+                          isUser
+                            ? "border-transparent bg-[#CC785C] text-white"
+                            : ""
+                        }
+                      >
+                        {isUser ? (
+                          <p className="break-words text-sm">{message.text}</p>
+                        ) : (
+                          <AIResponse>{message.text}</AIResponse>
+                        )}
+                      </AIMessageContent>
+                    </AIMessage>
+                  );
+                })}
+                {isSending && (
+                  <AIMessage from="assistant">
+                    <AIMessageContent>
+                      <div className="flex items-center gap-1 px-1 py-1">
+                        <span
+                          className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
+                          style={{ animationDelay: "0ms", animationDuration: "600ms" }}
+                        />
+                        <span
+                          className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
+                          style={{ animationDelay: "150ms", animationDuration: "600ms" }}
+                        />
+                        <span
+                          className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
+                          style={{ animationDelay: "300ms", animationDuration: "600ms" }}
+                        />
+                      </div>
                     </AIMessageContent>
                   </AIMessage>
-                );
-              })
+                )}
+              </>
             )}
           </AIConversationContent>
           <AIConversationScrollButton />
         </AIConversation>
       </div>
+
+      {/* Suggestions */}
+      {showSuggestions && (
+        <div className="shrink-0 bg-background px-3 py-2">
+          <div className="flex flex-col items-end gap-2">
+            {suggestions.map((suggestion, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className="cursor-pointer px-3 py-1.5 text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Input - sticks to bottom */}
       <div className="shrink-0 bg-background p-2">

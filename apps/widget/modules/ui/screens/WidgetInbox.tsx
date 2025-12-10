@@ -77,9 +77,6 @@ export const WidgetInbox = () => {
               <MessageSquare className="h-12 w-12 text-muted-foreground" />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-sm text-muted-foreground">
-                No conversations yet
-              </p>
               <p className="text-xs text-muted-foreground">
                 Start a new conversation from the home screen
               </p>
