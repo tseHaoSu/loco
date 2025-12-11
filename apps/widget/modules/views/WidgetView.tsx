@@ -1,8 +1,8 @@
 "use client";
 
-import { WidgetFooter } from "@/modules/ui/components/WidgetFooter";
-import { WidgetHeader } from "@/modules/ui/components/WidgetHeader";
-import { WidgetLoading } from "@/modules/ui/screens/WidgetLoading";
+import { WidgetFooter } from "@/modules/components/WidgetFooter";
+import { WidgetHeader } from "@/modules/components/WidgetHeader";
+import { WidgetLoading } from "@/modules/screens/WidgetLoading";
 import { screenAtom } from "@/store/widget-atoms";
 import { useAtomValue } from "jotai";
 import { WidgetAuth } from "../screens/WidgetAuth";
@@ -31,7 +31,7 @@ export const WidgetView = ({ organizationId }: Props) => {
     chat: <WidgetChat />,
   };
 
-  const showFooter = screen !== "chat";
+  const showFooter = screen !== "chat" && screen !== "auth";
 
   return (
     <div className="flex h-svh flex-col overflow-hidden bg-gradient-to-br from-background to-muted/20">

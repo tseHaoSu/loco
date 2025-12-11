@@ -1,4 +1,4 @@
-import { WidgetView } from "@/modules/ui/views/WidgetView";
+import { WidgetView } from "@/modules/views/WidgetView";
 
 interface Props {
   searchParams: Promise<{
