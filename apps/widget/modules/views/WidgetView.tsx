@@ -31,7 +31,7 @@ export const WidgetView = ({ organizationId }: Props) => {
     chat: <WidgetChat />,
   };
 
-  const showFooter = screen !== "chat" && screen !== "auth";
+  const showFooter = screen !== "chat" && screen !== "auth" && screen !== "loading" && screen !== "error";
 
   return (
     <div className="flex h-svh flex-col overflow-hidden bg-gradient-to-br from-background to-muted/20">
