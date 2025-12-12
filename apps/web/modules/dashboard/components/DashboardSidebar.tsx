@@ -48,7 +48,7 @@ const configurationItems = [
     icon: Palette,
   },
   {
-    title: "Integrations",
+    title: "Integrations/Preview",
     url: "/integrations",
     icon: LayoutDashboard,
   },
