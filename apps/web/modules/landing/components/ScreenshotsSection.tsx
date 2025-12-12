@@ -41,7 +41,7 @@ const screenshots = [
 
 export const ScreenshotsSection = () => {
   return (
-    <section className="relative z-40 px-6 py-32 max-w-7xl mx-auto">
+    <section className="relative z-40 px-4 sm:px-6 py-16 sm:py-24 md:py-32 max-w-7xl mx-auto">
       <motion.div
         className="text-center space-y-4 mb-16"
         initial={{ opacity: 0, y: 30 }}
@@ -70,7 +70,7 @@ export const ScreenshotsSection = () => {
         </motion.p>
       </motion.div>
 
-      <div className="w-full max-w-5xl mx-auto px-12">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 md:px-12">
         <Carousel
           opts={{
             align: "center",

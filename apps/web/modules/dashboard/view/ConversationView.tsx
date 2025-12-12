@@ -203,7 +203,7 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
         </div>
       </header>
 
-      <AIConversation className="max-h-[calc(100vh-53px)]">
+      <AIConversation className="max-h-[calc(100vh-150px)] md:max-h-[calc(100vh-120px)]">
         <AIConversationContent>
           <InfiniteScrollTrigger
             ref={topElementRef}
@@ -261,13 +261,16 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
               <AIInputButton
                 disabled={conversation?.status === "resolved" || isEnhancing}
                 onClick={handleEnhanceResponse}
+                className="hidden sm:inline-flex"
               >
                 {isEnhancing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Wand2Icon className="h-4 w-4" />
                 )}
-                {isEnhancing ? "Enhancing..." : "Enhance"}
+                <span className="hidden md:inline">
+                  {isEnhancing ? "Enhancing..." : "Enhance"}
+                </span>
               </AIInputButton>
               <AIInputSubmit>
                 <ArrowUp className="h-4 w-4" />

@@ -25,7 +25,7 @@ export const PluginCard = ({
   onSubmit,
 }: PluginCardProps) => {
   return (
-    <div className="h-fit w-full rounded-lg border p-8 bg-background">
+    <div className="h-fit w-full rounded-lg border p-4 sm:p-6 md:p-8 bg-background">
       <div className="mb-6 flex items-center justify-center gap-6">
         <Image src={serviceImage} alt={serviceName} width={40} height={40} />
         <div className="flex flex-col items-center">

@@ -21,10 +21,10 @@ export const CustomizationView = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted p-8">
+    <div className="flex min-h-screen flex-col bg-muted p-4 sm:p-6 md:p-8">
       <div className="mx-auto w-full max-w-screen-md">
-        <h1 className="mb-2 text-2xl font-bold">Customization</h1>
-        <p className="mb-6 text-muted-foreground">
+        <h1 className="mb-2 text-xl sm:text-2xl font-bold">Customization</h1>
+        <p className="mb-6 text-sm sm:text-base text-muted-foreground">
           Customize the appearance and behavior of your widget
         </p>
 
