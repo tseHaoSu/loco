@@ -129,7 +129,7 @@ export const HeroSection = () => {
         >
           <Link href="/sign-up">
             <Button size="lg" className="px-8 h-12">
-              Start Free Trial
+              Try It Now
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </Link>
