@@ -55,7 +55,7 @@ export const HeroSection = () => {
   return (
     <motion.section
       ref={heroRef}
-      className="relative z-40 px-6 py-32 md:py-40 max-w-7xl mx-auto"
+      className="relative z-40 px-4 sm:px-6 py-20 sm:py-32 md:py-40 max-w-7xl mx-auto"
       style={{ y, opacity }}
     >
       <motion.div

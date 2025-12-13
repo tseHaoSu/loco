@@ -8,7 +8,7 @@ import { Card } from "@workspace/ui/components/card";
 
 export const CTASection = () => {
   return (
-    <section className="relative z-40 px-6 py-32 max-w-5xl mx-auto">
+    <section className="relative z-40 px-4 sm:px-6 py-16 sm:py-24 md:py-32 max-w-5xl mx-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -22,7 +22,7 @@ export const CTASection = () => {
           damping: 15,
         }}
       >
-        <Card className="relative p-12 bg-card/50 backdrop-blur-sm border-border overflow-hidden">
+        <Card className="relative p-6 sm:p-8 md:p-12 bg-card/50 backdrop-blur-sm border-border overflow-hidden">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">

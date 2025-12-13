@@ -85,7 +85,7 @@ const StepCard = ({
 
 export const HowItWorksSection = () => {
   return (
-    <section className="relative z-40 px-6 py-32 max-w-7xl mx-auto">
+    <section className="relative z-40 px-4 sm:px-6 py-16 sm:py-24 md:py-32 max-w-7xl mx-auto">
       <motion.div
         className="text-center space-y-4 mb-20"
         initial={{ opacity: 0, y: 30 }}

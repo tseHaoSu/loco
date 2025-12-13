@@ -87,26 +87,27 @@ export const FilesView = () => {
         onConfirm={handleDeleteConfirm}
         fileName={fileToDelete?.name}
       />
-      <div className="min-h-screen bg-muted p-8 flex flex-col">
+      <div className="min-h-screen bg-muted p-4 sm:p-6 md:p-8 flex flex-col">
         <div className="mx-auto w-full max-w-screen-md">
-          <h1 className="mb-2 text-2xl font-bold">Knowledge Base</h1>
-          <p className="mb-6 text-muted-foreground">
+          <h1 className="mb-2 text-xl sm:text-2xl font-bold">Knowledge Base</h1>
+          <p className="mb-6 text-sm sm:text-base text-muted-foreground">
             Upload and manage documents for your AI assistant
           </p>
-          <div className="mt-8 rounded-lg border bg-background">
-            <div className="flex items-center justify-end border-b px-6 py-4">
-              <Button onClick={() => setUploadDialogOpen(true)}>
+          <div className="mt-4 sm:mt-8 rounded-lg border bg-background">
+            <div className="flex items-center justify-end border-b px-4 sm:px-6 py-3 sm:py-4">
+              <Button onClick={() => setUploadDialogOpen(true)} size="sm" className="sm:size-default">
                 <Plus className="h-4 w-4" />
-                Upload
+                <span className="hidden sm:inline ml-1">Upload</span>
               </Button>
             </div>
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-6 py-4 font-medium">Name</TableHead>
-                  <TableHead className="px-6 py-4 font-medium">Type</TableHead>
-                  <TableHead className="px-6 py-4 font-medium">Size</TableHead>
-                  <TableHead className="px-6 py-4 font-medium text-right">
+                  <TableHead className="px-4 sm:px-6 py-3 sm:py-4 font-medium">Name</TableHead>
+                  <TableHead className="px-4 sm:px-6 py-3 sm:py-4 font-medium hidden sm:table-cell">Type</TableHead>
+                  <TableHead className="px-4 sm:px-6 py-3 sm:py-4 font-medium hidden sm:table-cell">Size</TableHead>
+                  <TableHead className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-right">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -133,19 +134,27 @@ export const FilesView = () => {
                 ) : (
                   files.results.map((file) => (
                     <TableRow key={file.id}>
-                      <TableCell className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <FileIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{file.name}</span>
+                      <TableCell className="px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <FileIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <div className="min-w-0">
+                            <span className="font-medium block truncate max-w-[150px] sm:max-w-none">{file.name}</span>
+                            <div className="flex items-center gap-2 sm:hidden mt-1">
+                              <Badge variant="secondary" className="text-xs">
+                                {file.type.toUpperCase()}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{file.size}</span>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-4 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                         <Badge variant="secondary">
                           {file.type.toUpperCase()}
                         </Badge>
                       </TableCell>
-                      <TableCell className="px-6 py-4">{file.size}</TableCell>
-                      <TableCell className="px-6 py-4 text-right">
+                      <TableCell className="px-4 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">{file.size}</TableCell>
+                      <TableCell className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
@@ -167,6 +176,7 @@ export const FilesView = () => {
                 )}
               </TableBody>
             </Table>
+            </div>
             {!isLoadingFirstPage && files.results.length > 0 && (
               <InfiniteScrollTrigger
                 canLoadMore={canLoadMore}

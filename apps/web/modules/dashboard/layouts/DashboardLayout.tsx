@@ -6,6 +6,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import { cookies } from "next/headers";
 import { DashboardSidebar } from "../components/DashboardSidebar";
+import { MobileHeader } from "../components/MobileHeader";
 
 export const DashboardLayout = async ({
   children,
@@ -19,7 +20,10 @@ export const DashboardLayout = async ({
       <OrganizationGuard>
         <SidebarProvider defaultOpen={defaultOpen}>
           <DashboardSidebar />
-          <main className="flex flex-1 flex-col">{children}</main>
+          <main className="flex flex-1 flex-col">
+            <MobileHeader />
+            {children}
+          </main>
         </SidebarProvider>
       </OrganizationGuard>
     </AuthGuard>
