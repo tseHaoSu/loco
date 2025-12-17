@@ -64,10 +64,10 @@ export const IntegrationsView = () => {
   }, [showPreview, watchedValues.organizationId, watchedValues.position]);
 
   return (
-    <div className="min-h-screen bg-muted p-8">
+    <div className="min-h-screen bg-muted p-4 sm:p-6 md:p-8">
       <div className="mx-auto w-full max-w-screen-md">
-        <h1 className="mb-2 text-2xl font-bold">Integrations/Preview</h1>
-        <p className="mb-6 text-muted-foreground">
+        <h1 className="mb-2 text-xl sm:text-2xl font-bold">Integrations/Preview</h1>
+        <p className="mb-6 text-sm sm:text-base text-muted-foreground">
           Add the widget to your website and preview it live.
         </p>
         <div className="flex flex-col gap-6">
