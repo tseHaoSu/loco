@@ -64,22 +64,21 @@ export const IntegrationsView = () => {
   }, [showPreview, watchedValues.organizationId, watchedValues.position]);
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Integrations/Preview</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
+    <div className="min-h-screen bg-muted p-8">
+      <div className="mx-auto w-full max-w-screen-md">
+        <h1 className="mb-2 text-2xl font-bold">Integrations/Preview</h1>
+        <p className="mb-6 text-muted-foreground">
           Add the widget to your website and preview it live.
         </p>
-      </div>
-      <InstructionsCard />
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <WidgetConfigCard
-          form={form}
-          showPreview={showPreview}
-          onTogglePreview={() => setShowPreview(!showPreview)}
-        />
-        <EmbedCodeCard embedCode={embedCode} />
+        <div className="flex flex-col gap-6">
+          <InstructionsCard />
+          <WidgetConfigCard
+            form={form}
+            showPreview={showPreview}
+            onTogglePreview={() => setShowPreview(!showPreview)}
+          />
+          <EmbedCodeCard embedCode={embedCode} />
+        </div>
       </div>
     </div>
   );
