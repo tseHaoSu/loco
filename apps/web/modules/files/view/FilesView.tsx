@@ -25,6 +25,7 @@ import { Plus, FileIcon, MoreHorizontal, Trash, Upload } from "lucide-react";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/ai/infinite-scroll-trigger";
 import { UploadDialog } from "../components/UploadDialog";
 import { DeleteFileDialog } from "../components/DeleteFileDialog";
+import { InstructionsCard } from "../components/InstructionsCard";
 
 export const FilesView = () => {
   const files = usePaginatedQuery(
@@ -93,6 +94,9 @@ export const FilesView = () => {
           <p className="mb-6 text-sm sm:text-base text-muted-foreground">
             Upload and manage documents for your AI assistant
           </p>
+          <div className="mb-6">
+            <InstructionsCard />
+          </div>
           <div className="mt-4 sm:mt-8 rounded-lg border bg-background">
             <div className="flex items-center justify-end border-b px-4 sm:px-6 py-3 sm:py-4">
               <Button onClick={() => setUploadDialogOpen(true)} size="sm" className="sm:size-default">
