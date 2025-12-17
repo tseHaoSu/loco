@@ -1,3 +1,6 @@
+import { Download } from "lucide-react";
+
+import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
 
 const INSTRUCTIONS = [
@@ -6,9 +9,15 @@ const INSTRUCTIONS = [
   "Keep files updated for accurate responses.",
 ];
 
+const EXAMPLE_FILES = [
+  { name: "FAQ", file: "faq.txt" },
+  { name: "Pricing", file: "pricing-plans.txt" },
+  { name: "Invoice", file: "billing-invoice-example.txt" },
+];
+
 export const InstructionsCard = () => (
   <Card>
-    <CardContent>
+    <CardContent className="space-y-4">
       <ol className="space-y-2">
         {INSTRUCTIONS.map((instruction, index) => (
           <li
@@ -22,6 +31,27 @@ export const InstructionsCard = () => (
           </li>
         ))}
       </ol>
+
+      <div className="border-t pt-4">
+        <p className="text-xs text-muted-foreground mb-2">
+          Download example files to get started:
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {EXAMPLE_FILES.map((example) => (
+            <Button
+              key={example.file}
+              variant="outline"
+              size="sm"
+              asChild
+            >
+              <a href={`/examples/${example.file}`} download>
+                <Download className="h-3 w-3 mr-1" />
+                {example.name}
+              </a>
+            </Button>
+          ))}
+        </div>
+      </div>
     </CardContent>
   </Card>
 );
