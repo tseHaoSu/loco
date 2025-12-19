@@ -32,10 +32,7 @@ export const getPhoneNumber = action({
     );
 
     if (!plugin) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Vapi plugin not configured for this organization.",
-      });
+      return null;
     }
 
     const secretName = plugin.secretName;
@@ -46,17 +43,11 @@ export const getPhoneNumber = action({
     }>(secretValue);
 
     if (!secretData) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Vapi secret data is invalid.",
-      });
+      return null;
     }
 
     if (!secretData.privateApiKey || !secretData.publicApiKey) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Vapi secret data is incomplete.",
-      });
+      return null;
     }
 
     const vapiClient = new VapiClient({
@@ -100,10 +91,7 @@ export const getAssistant = action({
     );
 
     if (!plugin) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Vapi plugin not configured for this organization.",
-      });
+      return null;
     }
 
     const secretName = plugin.secretName;
@@ -114,25 +102,22 @@ export const getAssistant = action({
     }>(secretValue);
 
     if (!secretData) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Vapi secret data is invalid.",
-      });
+      return null;
     }
 
     if (!secretData.privateApiKey || !secretData.publicApiKey) {
-      throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Vapi secret data is incomplete.",
-      });
+      return null;
     }
 
     const vapiClient = new VapiClient({
       token: secretData.privateApiKey,
     });
 
-    const assistants = await vapiClient.assistants.list();
-
-    return assistants;
+    try {
+      const assistants = await vapiClient.assistants.list();
+      return assistants;
+    } catch {
+      return null;
+    }
   },
 });
