@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 export const Footer = () => {
   return (
     <motion.footer
-      className="relative z-40 px-6 py-12 border-t border-border mt-20"
+      className="relative z-40 px-4 sm:px-6 py-12 sm:py-16 border-t border-border"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}

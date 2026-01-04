@@ -9,7 +9,6 @@ import {
   FeaturesSection,
   ScreenshotsSection,
   TestimonialsSection,
-  CTASection,
   Footer,
 } from "./components";
 
@@ -34,7 +33,7 @@ export const LandingView = () => {
       <HowItWorksSection />
       <FeaturesSection mousePosition={mousePosition} />
       <ScreenshotsSection />
-      <CTASection />
+      <TestimonialsSection />
       <Footer />
     </div>
   );
