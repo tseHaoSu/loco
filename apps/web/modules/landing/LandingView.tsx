@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Script from "next/script";
 import {
   AnimatedBackground,
   Navigation,
@@ -23,18 +24,26 @@ export const LandingView = () => {
   };
 
   return (
-    <div
-      className="relative min-h-screen overflow-hidden bg-background"
-      onMouseMove={handleMouseMove}
-    >
-      <AnimatedBackground mousePosition={mousePosition} />
-      <Navigation />
-      <HeroSection />
-      <HowItWorksSection />
-      <FeaturesSection mousePosition={mousePosition} />
-      <ScreenshotsSection />
-      <TestimonialsSection />
-      <Footer />
-    </div>
+    <>
+      <div
+        className="relative min-h-screen overflow-hidden bg-background"
+        onMouseMove={handleMouseMove}
+      >
+        <AnimatedBackground mousePosition={mousePosition} />
+        <Navigation />
+        <HeroSection />
+        <HowItWorksSection />
+        <FeaturesSection mousePosition={mousePosition} />
+        <ScreenshotsSection />
+        <TestimonialsSection />
+        <Footer />
+      </div>
+      <Script
+        src="https://loco-web-gules.vercel.app/widget.js"
+        data-organization-id="org_34xDMxfJTeH5sVbQ3EilTzttRPc"
+        data-position="bottom-right"
+        strategy="lazyOnload"
+      />
+    </>
   );
 };

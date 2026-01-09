@@ -1,6 +1,5 @@
 "use client";
 
-import { api } from "@workspace/backend/convex/_generated/api";
 import {
   Select,
   SelectContent,
@@ -11,12 +10,10 @@ import {
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { usePaginatedQuery } from "convex/react";
 import { ArrowUp, Check, Circle, CornerUpLeft, List, X } from "lucide-react";
-import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-
-type FilterStatus = "all" | "unresolved" | "escalated" | "resolved";
+import { useConversations } from "../../../contexts/hooks/useConversations";
+import type { FilterStatus } from "../../../contexts/ConvexDataContext";
 
 interface MessageContentPart {
   type: string;
@@ -32,23 +29,10 @@ interface LastMessage {
 }
 
 export const ConversationPanel = () => {
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const pathname = usePathname();
   const router = useRouter();
 
-  const {
-    results: conversations,
-    status,
-    loadMore,
-  } = usePaginatedQuery(
-    api.private.conversations.getMany,
-    {
-      status: filterStatus === "all" ? undefined : filterStatus,
-    },
-    {
-      initialNumItems: 10,
-    }
-  );
+  const { conversations, status, filterStatus, setFilter } = useConversations();
 
   const handleConversationClick = (conversationId: string) => {
     router.push(`/conversations/${conversationId}`);
@@ -131,7 +115,7 @@ export const ConversationPanel = () => {
       <div className="border-b p-2">
         <Select
           value={filterStatus}
-          onValueChange={(value) => setFilterStatus(value as FilterStatus)}
+          onValueChange={(value) => setFilter(value as FilterStatus)}
         >
           <SelectTrigger className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-accent focus-visible:ring-0">
             <List className="h-4 w-4" />
