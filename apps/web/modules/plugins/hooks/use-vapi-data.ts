@@ -65,6 +65,7 @@ export const useVapiPhoneNumbers = (): {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { data, isLoading, error };
@@ -110,6 +111,7 @@ export const useVapiAssistants = (): {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { data, isLoading, error };

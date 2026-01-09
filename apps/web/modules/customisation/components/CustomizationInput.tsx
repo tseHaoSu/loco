@@ -39,8 +39,8 @@ import {
 type VapiPhoneNumbersResponse = FunctionReturnType<typeof api.private.vapi.getPhoneNumber>;
 type VapiAssistantsResponse = FunctionReturnType<typeof api.private.vapi.getAssistant>;
 
-type VapiAssistant = VapiAssistantsResponse extends (infer T)[] ? T : never;
-type VapiPhoneNumber = VapiPhoneNumbersResponse extends (infer T)[] ? T : never;
+type VapiAssistant = NonNullable<VapiAssistantsResponse> extends (infer T)[] ? T : never;
+type VapiPhoneNumber = NonNullable<VapiPhoneNumbersResponse> extends (infer T)[] ? T : never;
 
 const widgetSettingsSchema = z.object({
   greetMessage: z.string().min(1, "Required"),
@@ -103,7 +103,8 @@ export const CustomizationInput = ({
     };
 
     loadVapiData();
-  }, [vapiPlugin, getVapiPhoneNumbers, getVapiAssistants]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vapiPlugin]);
 
   const assistantsLoading = vapiData.isLoading;
   const phoneNumbersLoading = vapiData.isLoading;

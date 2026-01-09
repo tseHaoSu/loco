@@ -11,7 +11,7 @@ import { EmbedCodeCard } from "../components/EmbedCodeCard";
 import { InstructionsCard } from "../components/InstructionsCard";
 import { WidgetConfigCard } from "../components/WidgetConfigCard";
 
-const WIDGET_SCRIPT_URL = "https://loco-web-gules.vercel.app/widget.js";
+const WIDGET_SCRIPT_URL = process.env.NEXT_PUBLIC_WIDGET_SCRIPT_URL || "/widget.js";
 
 const widgetFormSchema = z.object({
   organizationId: z.string().min(1, "Organization ID is required"),
