@@ -37,6 +37,7 @@ npm-debug.log*
 
 # Claude Code
 .claude
+CLAUDE.md
 
 # Test files
 apps/embed/test.html

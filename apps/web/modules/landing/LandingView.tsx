@@ -38,12 +38,12 @@ export const LandingView = () => {
         <TestimonialsSection />
         <Footer />
       </div>
-      <Script
+      {/* <Script
         src="https://loco-web-gules.vercel.app/widget.js"
         data-organization-id="org_34xDMxfJTeH5sVbQ3EilTzttRPc"
         data-position="bottom-right"
         strategy="lazyOnload"
-      />
+      /> */}
     </>
   );
 };
