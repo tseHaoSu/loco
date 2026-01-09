@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { usePaginatedQuery } from "convex/react";
 import {
   Select,
   SelectContent,
@@ -12,8 +14,9 @@ import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { ArrowUp, Check, Circle, CornerUpLeft, List, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useConversations } from "../../../contexts/hooks/useConversations";
-import type { FilterStatus } from "../../../contexts/ConvexDataContext";
+import { api } from "@workspace/backend/convex/_generated/api";
+
+type FilterStatus = "all" | "unresolved" | "escalated" | "resolved";
 
 interface MessageContentPart {
   type: string;
@@ -32,10 +35,31 @@ export const ConversationPanel = () => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { conversations, status, filterStatus, setFilter } = useConversations();
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("conversationFilter");
+      return (saved as FilterStatus) || "all";
+    }
+    return "all";
+  });
+
+  const conversations = usePaginatedQuery(
+    api.private.conversations.getMany,
+    {
+      status: filterStatus === "all" ? undefined : filterStatus,
+    },
+    { initialNumItems: 10 }
+  );
 
   const handleConversationClick = (conversationId: string) => {
     router.push(`/conversations/${conversationId}`);
+  };
+
+  const handleFilterChange = (value: FilterStatus) => {
+    setFilterStatus(value);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("conversationFilter", value);
+    }
   };
 
   const isSelected = (conversationId: string) => {
@@ -115,7 +139,7 @@ export const ConversationPanel = () => {
       <div className="border-b p-2">
         <Select
           value={filterStatus}
-          onValueChange={(value) => setFilter(value as FilterStatus)}
+          onValueChange={handleFilterChange}
         >
           <SelectTrigger className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-accent focus-visible:ring-0">
             <List className="h-4 w-4" />
@@ -140,20 +164,20 @@ export const ConversationPanel = () => {
       </div>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-3">
-        {status === "LoadingFirstPage" && (
+        {conversations.status === "LoadingFirstPage" && (
           <div className="flex items-center justify-center px-4 py-4">
             Loading
           </div>
         )}
 
-        {status !== "LoadingFirstPage" &&
-          (!conversations || conversations.length === 0) && (
+        {conversations.status !== "LoadingFirstPage" &&
+          (!conversations.results || conversations.results.length === 0) && (
             <div className="flex items-center justify-center px-4 py-4 text-muted-foreground">
               No conversations found
             </div>
           )}
 
-        {conversations?.map((conversation) => (
+        {conversations.results?.map((conversation) => (
           <Button
             key={conversation._id}
             onClick={() => handleConversationClick(conversation._id)}

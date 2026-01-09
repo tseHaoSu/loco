@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import type { FunctionReturnType } from "convex/server";
 
 import { api } from "@workspace/backend/convex/_generated/api";
 import { Doc } from "@workspace/backend/convex/_generated/dataModel";
@@ -34,7 +36,11 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 
-import { useVapiData } from "../../../contexts/hooks/useVapiData";
+type VapiPhoneNumbersResponse = FunctionReturnType<typeof api.private.vapi.getPhoneNumber>;
+type VapiAssistantsResponse = FunctionReturnType<typeof api.private.vapi.getAssistant>;
+
+type VapiAssistant = VapiAssistantsResponse extends (infer T)[] ? T : never;
+type VapiPhoneNumber = VapiPhoneNumbersResponse extends (infer T)[] ? T : never;
 
 const widgetSettingsSchema = z.object({
   greetMessage: z.string().min(1, "Required"),
@@ -60,10 +66,47 @@ export const CustomizationInput = ({
 }: CustomizationInputProps) => {
   const upsertSettings = useMutation(api.private.widgetSettings.upsert);
   const removeSettings = useMutation(api.private.widgetSettings.remove);
-  const { assistants, phoneNumbers, isLoading } = useVapiData();
 
-  const assistantsLoading = isLoading;
-  const phoneNumbersLoading = isLoading;
+  const vapiPlugin = useQuery(api.private.plugin.getOne, { service: "vapi" });
+  const getVapiPhoneNumbers = useAction(api.private.vapi.getPhoneNumber);
+  const getVapiAssistants = useAction(api.private.vapi.getAssistant);
+
+  const [vapiData, setVapiData] = useState<{
+    assistants: VapiAssistant[];
+    phoneNumbers: VapiPhoneNumber[];
+    isLoading: boolean;
+  }>({
+    assistants: [],
+    phoneNumbers: [],
+    isLoading: false,
+  });
+
+  useEffect(() => {
+    if (!vapiPlugin) return;
+
+    const loadVapiData = async () => {
+      setVapiData(prev => ({ ...prev, isLoading: true }));
+      try {
+        const [phoneNumbers, assistants] = await Promise.all([
+          getVapiPhoneNumbers({}).catch(() => [] as VapiPhoneNumbersResponse),
+          getVapiAssistants({}).catch(() => [] as VapiAssistantsResponse),
+        ]);
+        setVapiData({
+          phoneNumbers: (phoneNumbers || []) as VapiPhoneNumber[],
+          assistants: (assistants || []) as VapiAssistant[],
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error("Failed to load Vapi data:", error);
+        setVapiData({ assistants: [], phoneNumbers: [], isLoading: false });
+      }
+    };
+
+    loadVapiData();
+  }, [vapiPlugin, getVapiPhoneNumbers, getVapiAssistants]);
+
+  const assistantsLoading = vapiData.isLoading;
+  const phoneNumbersLoading = vapiData.isLoading;
 
   const form = useForm<WidgetSettingsFormValues>({
     resolver: zodResolver(widgetSettingsSchema),
@@ -245,7 +288,7 @@ export const CustomizationInput = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {assistants?.map((assistant) => (
+                      {vapiData.assistants?.map((assistant) => (
                         <SelectItem key={assistant.id} value={assistant.id}>
                           {assistant.name || assistant.id}
                         </SelectItem>
@@ -280,7 +323,7 @@ export const CustomizationInput = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {phoneNumbers
+                      {vapiData.phoneNumbers
                         ?.filter((p) => p.number)
                         .map((phoneNumber) => (
                           <SelectItem

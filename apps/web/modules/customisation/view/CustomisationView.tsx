@@ -1,14 +1,15 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
 
+import { api } from "@workspace/backend/convex/_generated/api";
 import { Separator } from "@workspace/ui/components/separator";
-import { useWidgetSettings } from "../../../contexts/hooks/useWidgetSettings";
 
 import { CustomizationInput } from "../components/CustomizationInput";
 
 export const CustomizationView = () => {
-  const widgetSettings = useWidgetSettings();
+  const widgetSettings = useQuery(api.private.widgetSettings.getOne);
 
   // Loading state
   if (widgetSettings === undefined) {

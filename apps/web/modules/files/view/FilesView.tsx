@@ -11,9 +11,8 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
-import { useMutation } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
-import { useFiles } from "../../../contexts/hooks/useFiles";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import {
@@ -29,7 +28,11 @@ import { DeleteFileDialog } from "../components/DeleteFileDialog";
 import { InstructionsCard } from "../components/InstructionsCard";
 
 export const FilesView = () => {
-  const { files, status, loadMore } = useFiles();
+  const filesResult = usePaginatedQuery(
+    api.private.files.list,
+    {},
+    { initialNumItems: 10 }
+  );
 
   const deleteFile = useMutation(api.private.files.deleteFile);
 
@@ -40,8 +43,8 @@ export const FilesView = () => {
     isLoadingFirstPage,
     isLoadingMore,
   } = useInfiniteScroll({
-    status,
-    loadMore,
+    status: filesResult.status,
+    loadMore: filesResult.loadMore,
     loadSize: 10,
   });
 
@@ -123,7 +126,7 @@ export const FilesView = () => {
                       Loading files...
                     </TableCell>
                   </TableRow>
-                ) : files.length === 0 ? (
+                ) : (filesResult.results ?? []).length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={4}
@@ -133,7 +136,7 @@ export const FilesView = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  files.map((file) => (
+                  (filesResult.results ?? []).map((file) => (
                     <TableRow key={file.id}>
                       <TableCell className="px-4 sm:px-6 py-3 sm:py-4">
                         <div className="flex items-center gap-2 sm:gap-3">
@@ -178,7 +181,7 @@ export const FilesView = () => {
               </TableBody>
             </Table>
             </div>
-            {!isLoadingFirstPage && files.length > 0 && (
+            {!isLoadingFirstPage && (filesResult.results ?? []).length > 0 && (
               <InfiniteScrollTrigger
                 canLoadMore={canLoadMore}
                 isLoadingMore={isLoadingMore}

@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+import { useQuery } from "convex/react";
 import { Feature, PluginCard } from "../components/PluginCard";
 import { VapiPluginForm } from "../components/VapiPluginForm";
 import { VapiDisconnectForm } from "../components/VapiDisconnectForm";
 import { VapiConnectedView } from "./VapiConnectedView";
 import { Phone, MessageSquare, Clock, Zap, BarChart3 } from "lucide-react";
-import { useVapiPlugin } from "../../../contexts/hooks/useVapiPlugin";
+import { api } from "@workspace/backend/convex/_generated/api";
 
 const vapiFeatures: Feature[] = [
   {
@@ -37,7 +38,7 @@ const vapiFeatures: Feature[] = [
 ];
 
 export const VapiView = () => {
-  const vapiPlugin = useVapiPlugin();
+  const vapiPlugin = useQuery(api.private.plugin.getOne, { service: "vapi" });
 
   const [connectOpen, setConnectOpen] = useState(false);
   const [disconnectOpen, setDisconnectOpen] = useState(false);
