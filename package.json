@@ -7,9 +7,19 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "count": "npx cloc --exclude-dir=node_modules,.next,dist,.turbo,.convex,_generated --exclude-ext=json,lock ."
+    "count": "npx cloc --exclude-dir=node_modules,.next,dist,.turbo,.convex,_generated --exclude-ext=json,lock .",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:auth": "playwright test tests/auth",
+    "test:e2e:conversations": "playwright test tests/conversations",
+    "test:e2e:files": "playwright test tests/files",
+    "test:e2e:navigation": "playwright test tests/navigation",
+    "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "prettier": "^3.6.2",

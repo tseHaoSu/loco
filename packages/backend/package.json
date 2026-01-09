@@ -2,7 +2,7 @@
   "name": "@workspace/backend",
   "type": "module",
   "scripts": {
-    "dev": "convex dev",
+    "dev": "CONVEX_DEPLOYMENT=prod:fabulous-cat-587 convex dev",
     "setup": "convex dev --until-success",
     "build": "echo 'Convex backend - run pnpm dev to start'"
   },
