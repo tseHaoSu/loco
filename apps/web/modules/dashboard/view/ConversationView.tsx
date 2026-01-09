@@ -4,14 +4,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 
-import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
+import { toUIMessages } from "@convex-dev/agent/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { ArrowUp, Loader2, MoreHorizontalIcon, Trash2, User, Wand2Icon } from "lucide-react";
 import { z } from "zod";
 
 import { api } from "@workspace/backend/convex/_generated/api";
 import type { Id } from "@workspace/backend/convex/_generated/dataModel";
+import { useConversationDetail } from "../../../contexts/hooks/useConversationDetail";
 import {
   AIConversation,
   AIConversationContent,
@@ -60,21 +61,13 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
   const { isContactPanelOpen, toggleContactPanel } = useContactPanel();
   const router = useRouter();
 
-  const conversation = useQuery(
-    api.private.conversations.getOne,
-    isDeleting ? "skip" : { conversationId }
-  );
-
-  const messages = useThreadMessages(
-    api.private.messages.getMany,
-    conversation?.threadId ? { threadId: conversation.threadId } : "skip",
-    { initialNumItems: 10 }
-  );
+  const { conversation, messages, messagesStatus, loadMore } =
+    useConversationDetail(conversationId);
 
   const { topElementRef, handleLoadMore, canLoadMore, isLoadingMore } =
     useInfiniteScroll({
-      status: messages.status,
-      loadMore: messages.loadMore,
+      status: messagesStatus,
+      loadMore,
       loadSize: 10,
       observerEnabled: true,
     });
@@ -213,7 +206,7 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
             loadMoreText="Load older messages"
             noMoreText="No older messages"
           />
-          {toUIMessages(messages.results ?? [])?.map((message) => (
+          {toUIMessages(messages ?? [])?.map((message) => (
             <AIMessage
               key={message.key}
               from={message.role === "user" ? "assistant" : "user"}

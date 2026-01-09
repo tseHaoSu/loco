@@ -1,11 +1,10 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { useParams } from "next/navigation";
 import { Globe, Mail, Monitor, Clock } from "lucide-react";
 
-import { api } from "@workspace/backend/convex/_generated/api";
 import type { Id } from "@workspace/backend/convex/_generated/dataModel";
+import { useContactSession } from "../../../contexts/hooks/useContactSession";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { Separator } from "@workspace/ui/components/separator";
 import { cn } from "@workspace/ui/lib/utils";
@@ -34,10 +33,7 @@ const ContactPanel = () => {
   const params = useParams();
   const conversationId = params.conversationId as Id<"conversations">;
 
-  const contactSession = useQuery(
-    api.private.contactSessions.getOneByConversationId,
-    { conversationId }
-  );
+  const contactSession = useContactSession(conversationId);
 
   if (!contactSession) {
     return (

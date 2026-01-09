@@ -34,10 +34,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 
-import {
-  useVapiAssistants,
-  useVapiPhoneNumbers,
-} from "../../plugins/hooks/use-vapi-data";
+import { useVapiData } from "../../../contexts/hooks/useVapiData";
 
 const widgetSettingsSchema = z.object({
   greetMessage: z.string().min(1, "Required"),
@@ -63,10 +60,10 @@ export const CustomizationInput = ({
 }: CustomizationInputProps) => {
   const upsertSettings = useMutation(api.private.widgetSettings.upsert);
   const removeSettings = useMutation(api.private.widgetSettings.remove);
-  const { data: assistants, isLoading: assistantsLoading } =
-    useVapiAssistants();
-  const { data: phoneNumbers, isLoading: phoneNumbersLoading } =
-    useVapiPhoneNumbers();
+  const { assistants, phoneNumbers, isLoading } = useVapiData();
+
+  const assistantsLoading = isLoading;
+  const phoneNumbersLoading = isLoading;
 
   const form = useForm<WidgetSettingsFormValues>({
     resolver: zodResolver(widgetSettingsSchema),
