@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 
-import type { WidgetFormValues } from "../view/IntegrationsView";
+import type { WidgetFormValues } from "../views/IntegrationsView";
 
 interface WidgetConfigCardProps {
   form: UseFormReturn<WidgetFormValues>;
