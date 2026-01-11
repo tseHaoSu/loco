@@ -10,7 +10,7 @@ import {
   ScreenshotsSection,
   TestimonialsSection,
   Footer,
-} from "./components";
+} from "../components";
 
 export const LandingView = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });

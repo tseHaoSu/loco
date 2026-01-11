@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import SignUpView from "@/modules/auth/ui/views/SignUpView";
+import SignUpView from "@/modules/auth/views/SignUpView";
 
 const SignUpPage = async () => {
   const { userId } = await auth();

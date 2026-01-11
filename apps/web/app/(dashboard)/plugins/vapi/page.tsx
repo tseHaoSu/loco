@@ -1,4 +1,4 @@
-import { VapiView } from "@/modules/plugins/view/VapiView";
+import { VapiView } from "@/modules/plugins/views/VapiView";
 import React from "react";
 
 const VoiceAssistant = () => {

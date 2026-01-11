@@ -1,9 +1,6 @@
-import AuthGuard from "@/modules/auth/ui/components/AuthGuard";
-import OrganizationGuard from "@/modules/auth/ui/components/OrganizationGuard";
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from "@workspace/ui/components/sidebar";
+import AuthGuard from "@/modules/auth/components/AuthGuard";
+import OrganizationGuard from "@/modules/auth/components/OrganizationGuard";
+import { SidebarProvider } from "@workspace/ui/components/sidebar";
 import { cookies } from "next/headers";
 import { DashboardSidebar } from "../components/DashboardSidebar";
 import { MobileHeader } from "../components/MobileHeader";
