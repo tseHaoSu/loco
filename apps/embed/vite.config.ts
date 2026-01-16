@@ -1,8 +1,14 @@
 import { resolve } from "path"
-import { defineConfig } from "vite"
+import { defineConfig, loadEnv } from "vite"
 
-export default defineConfig({
-  build: {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, __dirname, "")
+
+  return {
+    define: {
+      "import.meta.env.VITE_WIDGET_URL": JSON.stringify(env.VITE_WIDGET_URL),
+    },
+    build: {
     lib: {
       entry: resolve(__dirname, "embed.ts"),
       name: "LocoWidget",
@@ -18,4 +24,5 @@ export default defineConfig({
       },
     },
   },
+  }
 })
