@@ -204,7 +204,9 @@ export const WidgetChat = () => {
               </div>
             ) : (
               <>
-                {toUIMessages(messages.results ?? []).map((message) => {
+                {toUIMessages(messages.results ?? [])
+                .filter((message) => message.role === "user" || message.text)
+                .map((message) => {
                   const isUser = message.role === "user";
                   return (
                     <AIMessage

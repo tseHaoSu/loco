@@ -4,7 +4,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { toast } from "sonner";
 import {
@@ -38,6 +38,7 @@ interface VapiPluginFormProps {
 }
 
 export const VapiPluginForm = ({ open, setOpen }: VapiPluginFormProps) => {
+  const validateKeys = useAction(api.private.vapi.validateKeys);
   const upsertSecret = useMutation(api.private.secrets.upsert);
 
   const form = useForm<FormValues>({
@@ -49,6 +50,15 @@ export const VapiPluginForm = ({ open, setOpen }: VapiPluginFormProps) => {
   });
 
   const onSubmit = async (values: FormValues) => {
+    try {
+      await validateKeys({ privateApiKey: values.privateKey });
+    } catch {
+      toast.error("Invalid Vapi API key", {
+        description: "Please check your credentials and try again.",
+      });
+      return;
+    }
+
     try {
       await upsertSecret({
         service: "vapi",
@@ -66,7 +76,7 @@ export const VapiPluginForm = ({ open, setOpen }: VapiPluginFormProps) => {
     } catch (error) {
       console.error("Failed to save Vapi credentials:", error);
       toast.error("Failed to connect Vapi", {
-        description: "Please check your credentials and try again.",
+        description: "Something went wrong. Please try again.",
       });
     }
   };

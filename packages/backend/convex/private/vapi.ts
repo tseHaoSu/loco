@@ -1,8 +1,37 @@
-import { ConvexError } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { getSecretValue, parseSecretValue } from "../lib/secrets";
 import { VapiClient } from "@vapi-ai/server-sdk";
+
+export const validateKeys = action({
+  args: {
+    privateApiKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity || identity === null) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "User must be authenticated.",
+      });
+    }
+
+    const vapiClient = new VapiClient({
+      token: args.privateApiKey,
+    });
+
+    try {
+      await vapiClient.assistants.list();
+      return { valid: true };
+    } catch {
+      throw new ConvexError({
+        code: "INVALID_API_KEY",
+        message: "Invalid Vapi API key. Please check your credentials.",
+      });
+    }
+  },
+});
 
 export const getPhoneNumber = action({
   args: {},
