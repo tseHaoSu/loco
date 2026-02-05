@@ -5,6 +5,7 @@ import {
   AnimatedBackground,
   Navigation,
   HeroSection,
+  EmbedCodeSection,
   HowItWorksSection,
   FeaturesSection,
   ScreenshotsSection,
@@ -31,6 +32,7 @@ export const LandingView = () => {
         <AnimatedBackground mousePosition={mousePosition} />
         <Navigation />
         <HeroSection />
+        <EmbedCodeSection />
         <HowItWorksSection />
         <FeaturesSection mousePosition={mousePosition} />
         <ScreenshotsSection />

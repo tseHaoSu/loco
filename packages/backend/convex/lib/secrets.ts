@@ -4,7 +4,9 @@ import {
   GetSecretValueCommandOutput,
   SecretsManagerClient,
   ResourceExistsException,
+  InvalidRequestException,
   PutSecretValueCommand,
+  DeleteSecretCommand,
 } from "@aws-sdk/client-secrets-manager";
 import { z } from "zod";
 
@@ -42,6 +44,20 @@ export async function upsertSecret(
       await client.send(
         new PutSecretValueCommand({
           SecretId: secretName,
+          SecretString: JSON.stringify(secretValue),
+        })
+      );
+    } else if (error instanceof InvalidRequestException) {
+      // Secret is pending deletion — force delete and recreate
+      await client.send(
+        new DeleteSecretCommand({
+          SecretId: secretName,
+          ForceDeleteWithoutRecovery: true,
+        })
+      );
+      await client.send(
+        new CreateSecretCommand({
+          Name: secretName,
           SecretString: JSON.stringify(secretValue),
         })
       );

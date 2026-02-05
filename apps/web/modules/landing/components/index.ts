@@ -1,6 +1,7 @@
 export { AnimatedBackground } from "./AnimatedBackground";
 export { Navigation } from "./Navigation";
 export { HeroSection } from "./HeroSection";
+export { EmbedCodeSection } from "./EmbedCodeSection";
 export { HowItWorksSection } from "./HowItWorksSection";
 export { FeaturesSection } from "./FeaturesSection";
 export { ScreenshotsSection } from "./ScreenshotsSection";
