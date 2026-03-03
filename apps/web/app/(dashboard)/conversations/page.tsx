@@ -52,8 +52,8 @@ const STEPS = [
 
 const Conversations = () => {
   return (
-    <div className="flex h-full w-full items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-sm">
+    <div className="flex h-full w-full p-4 overflow-y-auto">
+      <div className="w-full max-w-sm mx-auto my-auto">
         <div className="flex flex-col items-center">
           {STEPS.map((item, index) => (
             <div key={item.step} className="flex flex-col items-center w-full">
