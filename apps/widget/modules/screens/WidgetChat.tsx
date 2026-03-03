@@ -260,7 +260,7 @@ export const WidgetChat = () => {
       <div className="shrink-0 bg-background p-2">
         {/* Suggestions */}
         {showSuggestions && (
-          <div className="mb-2 flex flex-col items-end gap-1.5">
+          <div className="mb-2 flex flex-row flex-wrap justify-end gap-1.5">
             {suggestions.map((suggestion, index) => (
               <Badge
                 key={index}

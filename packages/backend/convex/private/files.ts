@@ -157,14 +157,19 @@ export const deleteFile = mutation({
       });
     }
 
-    // Delete RAG entry first (if this fails, storage is preserved)
+    // Delete RAG entry (chunks + embeddings + entry record)
     await rag.deleteAsync(ctx, {
       entryId: args.entryId,
     });
 
-    // Then delete from storage
+    // Delete from storage — wrapped so a missing/already-deleted storageId
+    // does not roll back the RAG deletion above.
     if (entry.metadata?.storageId) {
-      await ctx.storage.delete(entry.metadata.storageId as Id<"_storage">);
+      try {
+        await ctx.storage.delete(entry.metadata.storageId as Id<"_storage">);
+      } catch (e) {
+        console.warn("Storage delete failed (file may already be gone):", e);
+      }
     }
 
     return { success: true, entryId: args.entryId };
